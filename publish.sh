@@ -14,7 +14,10 @@ git commit -qm "feat: 菜单栏日程倒计时首个版本" || echo "(没有新�
 git remote get-url origin >/dev/null 2>&1 || git remote add origin "$REMOTE"
 
 echo "==> 推送"
-git push -u origin main
+# 仓库创建时 GitHub 自动生成了一个 LICENSE commit，本地这份才是要保留的。
+# 仓库里没有别人的工作，直接覆盖那个初始 commit。
+git push -u --force-with-lease=main origin main 2>/dev/null \
+  || git push -u --force origin main
 
 echo "==> 打 tag v1.0.0，触发 GitHub Actions 构建与发布"
 git tag -f v1.0.0
