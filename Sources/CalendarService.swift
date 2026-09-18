@@ -24,7 +24,11 @@ final class CalendarService: ObservableObject {
     private let lookBack: TimeInterval  = -60 * 60
     private let lookAhead: TimeInterval = 48 * 60 * 60
 
-    init() {
+    init() {}
+
+    /// 订阅与首次拉取。不能放在 init 里：init 期间 self 尚未完成初始化，
+    /// 逃逸到并发闭包里会报 "reference to captured var 'self'"。
+    func start() {
         changeObserver = NotificationCenter.default.addObserver(
             forName: .EKEventStoreChanged, object: store, queue: .main
         ) { [weak self] _ in
@@ -40,6 +44,8 @@ final class CalendarService: ObservableObject {
         NSWorkspaceNotificationBridge.onWake { [weak self] in
             Task { @MainActor in self?.reload() }
         }
+
+        requestAccess()
     }
 
     // 不写 deinit：deinit 是非隔离上下文，触碰 @MainActor 属性在不同 Swift 版本

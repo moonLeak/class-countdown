@@ -20,7 +20,10 @@ struct ClassCountdownApp: App {
         _tick            = StateObject(wrappedValue: tick)
         _model           = StateObject(wrappedValue: model)
 
-        service.requestAccess()
+        // 订阅统一在各自的 start() 里建立，见 CalendarService.start 的注释。
+        tick.start()
+        model.start()
+        service.start()
     }
 
     var body: some Scene {

@@ -38,10 +38,17 @@ final class ScheduleModel: ObservableObject {
     private let settings: SettingsStore
     private var bag = Set<AnyCancellable>()
 
+    private let tick: TickEngine
+
     init(calendarService: CalendarService, settings: SettingsStore, tick: TickEngine) {
         self.calendarService = calendarService
         self.settings = settings
+        self.tick = tick
+    }
 
+    /// 建立订阅。同 CalendarService：不能放在 init 里，
+    /// init 期间 self 尚未完成初始化，逃逸到闭包里编译器会拒绝。
+    func start() {
         // 三个来源任一变化都重算。重算只是遍历几十条事件，开销可忽略。
         tick.$now
             .combineLatest(calendarService.$events, calendarService.$access)
@@ -53,7 +60,8 @@ final class ScheduleModel: ObservableObject {
         settings.objectWillChange
             .sink { [weak self] _ in
                 guard let self else { return }
-                DispatchQueue.main.async {
+                DispatchQueue.main.async { [weak self] in
+                    guard let self else { return }
                     self.recompute(now: Date(),
                                    events: self.calendarService.events,
                                    access: self.calendarService.access)

@@ -10,10 +10,11 @@ final class TickEngine: ObservableObject {
 
     private var timer: Timer?
 
-    init() { schedule() }
+    init() {}
     // 同 CalendarService：不写 deinit。
 
-    private func schedule() {
+    /// 同 CalendarService：订阅放在 init 之外。
+    func start() {
         timer?.invalidate()
         // 0.5 秒轮询：即便系统偶尔延迟触发，整秒也不会被跳过。
         // 空闲 CPU 影响可忽略，但比 1 秒定时器在边界上稳得多。
