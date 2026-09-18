@@ -1,70 +1,37 @@
 import SwiftUI
+import AppKit
 
 @main
 @MainActor
 struct ClassCountdownApp: App {
-
-    @StateObject private var settings: SettingsStore
-    @StateObject private var calendarService: CalendarService
-    @StateObject private var tick: TickEngine
-    @StateObject private var model: ScheduleModel
-
-    init() {
-        let settings = SettingsStore()
-        let service  = CalendarService()
-        let tick     = TickEngine()
-        let model    = ScheduleModel(calendarService: service, settings: settings, tick: tick)
-
-        _settings        = StateObject(wrappedValue: settings)
-        _calendarService = StateObject(wrappedValue: service)
-        _tick            = StateObject(wrappedValue: tick)
-        _model           = StateObject(wrappedValue: model)
-
-        // 订阅统一在各自的 start() 里建立，见 CalendarService.start 的注释。
-        tick.start()
-        model.start()
-        service.start()
-    }
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
 
     var body: some Scene {
-        // .window 样式才能放自定义 SwiftUI 视图；默认的 .menu 只能放菜单项。
-        MenuBarExtra {
-            CardStack(model: model, tick: tick, calendarService: calendarService)
-        } label: {
-            MenuBarLabel(model: model, tick: tick, settings: settings)
-        }
-        .menuBarExtraStyle(.window)
-
-        Settings {
-            SettingsView(settings: settings, calendarService: calendarService)
-        }
+        // 菜单栏、弹出面板、设置窗口都归 PanelController 管。
+        // 这里只是占位：SwiftUI 的 App 至少要有一个 Scene，
+        // 而 Settings 场景不会自己冒出来。
+        Settings { EmptyView() }
     }
 }
 
-/// 菜单栏那一行文字
-struct MenuBarLabel: View {
-    @ObservedObject var model: ScheduleModel
-    @ObservedObject var tick: TickEngine
-    @ObservedObject var settings: SettingsStore
+/// NSApplicationDelegate 的回调本来就在主线程，
+/// 整个类标到主 actor 上，PanelController 才能作为存储属性直接建
+@MainActor
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    private let panelController = PanelController()
 
-    var body: some View {
-        switch model.phase {
-        case .needsAccess:
-            Image(systemName: "calendar.badge.exclamationmark")
-        case .empty:
-            Image(systemName: "calendar")
-        case .running(let list):
-            if let e = list.first {
-                Text(TimeFormat.menuBar(
-                    title: e.title,
-                    time: TimeFormat.countdown(model.remaining(e, now: tick.now)),
-                    showTitle: settings.showsTitleInMenuBar))
-            }
-        case .upcoming(let e):
-            Text(TimeFormat.menuBar(
-                title: e.title,
-                time: "↑" + TimeFormat.countdown(model.remaining(e, now: tick.now, counting: true)),
-                showTitle: settings.showsTitleInMenuBar))
-        }
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        panelController.install()
     }
+
+    func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool { true }
+}
+
+extension Notification.Name {
+    /// 面板尺寸要跟着内容变，靠这个通知从 SwiftUI 那侧推过来
+    static let panelContentResized = Notification.Name("panelContentResized")
+    /// 右键菜单里点了设置
+    static let openSettingsRequested = Notification.Name("openSettingsRequested")
+    /// 内容层请求收回面板（例如跳去日历之后）
+    static let panelDismissRequested = Notification.Name("panelDismissRequested")
 }

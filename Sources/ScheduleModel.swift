@@ -25,8 +25,15 @@ final class ScheduleModel: ObservableObject {
         /// 所属日历的颜色，进度条直接用它
         let calendarColor: Color
 
+        /// 标题和日历颜色也要比。
+        /// 只比 id 和起止时间的话，在日历里改个名字，
+        /// 新快照会被判成“和旧的一样”，界面就永远停在旧标题上。
         static func == (a: EventSnapshot, b: EventSnapshot) -> Bool {
-            a.id == b.id && a.start == b.start && a.end == b.end
+            a.id == b.id
+                && a.start == b.start
+                && a.end == b.end
+                && a.title == b.title
+                && a.calendarColor == b.calendarColor
         }
     }
 

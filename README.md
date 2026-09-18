@@ -14,6 +14,11 @@ your event runs out.
 
 ---
 
+## Requirements
+
+macOS 26 or later. The card material uses the system Liquid Glass effect,
+which does not exist on earlier versions.
+
 ## Install
 
 ### Option 1: Download the DMG (recommended)
@@ -33,7 +38,7 @@ brew install --cask --no-quarantine class-countdown
 
 ### Option 3: Build it yourself
 
-All you need is the Xcode Command Line Tools:
+macOS 26 or later, and the Xcode Command Line Tools:
 
 ```bash
 git clone https://github.com/moonLeak/class-countdown.git
@@ -86,15 +91,28 @@ The same goes for iCloud, a school Exchange calendar, or any subscribed
 
 ### Settings
 
-Click the menu bar item, then the gear in the card's bottom-left corner:
+Right-click anywhere on the card and choose **Settings…**:
 
+- **Language** — the app's own interface, in 11 languages. Event titles always
+  stay in whatever the calendar says. Takes effect immediately, no relaunch
 - **Calendars** — which calendars count toward the countdown (e.g. keep your
   class schedule, drop birthdays and holidays)
 - **All-day events** — off by default, otherwise "Birthday" would occupy a
   whole day
-- **Warning color** — how much time left before the digits and bar change
-  color, 5 minutes by default
-- **Launch at login**
+- **Menu bar** — name and time left, or time only, and the separator between
+  them (presets or your own, with a live preview)
+- **Ending soon alert** — how much time left before the bar turns orange,
+  5 minutes by default
+- **Open at login**
+
+### Gestures
+
+| Gesture | What happens |
+| --- | --- |
+| Click the menu bar item | The stack flies out of the icon; click again to send it back |
+| Click a card | Expand the stack, click again to collapse |
+| Right-click a card | Open Calendar, Settings, About, Quit |
+| Force click a card (trackpad) | The card sinks, Calendar opens, the panel retracts |
 
 ---
 
@@ -111,13 +129,16 @@ Click the menu bar item, then the gear in the card's bottom-left corner:
 
 | File | Responsibility |
 | --- | --- |
-| `Sources/App.swift` | Entry point, MenuBarExtra scene, the menu bar line |
+| `Sources/App.swift` | Entry point and app delegate |
+| `Sources/PanelController.swift` | Status item, the transparent panel, show/hide animation, settings window |
 | `Sources/DesignTokens.swift` | Every number the design settled on, plus the glass material |
 | `Sources/CalendarService.swift` | EventKit wrapper: access, 48-hour window, change notifications |
 | `Sources/ScheduleModel.swift` | State machine: which events are running, seconds left, progress |
 | `Sources/CardStack.swift` | The popover: Wallet-style stack, expand, context menu |
+| `Sources/Interaction.swift` | Click and force click on one card, in a single NSView |
+| `Sources/Localization.swift` | Runtime string table, 11 languages, switches without a relaunch |
+| `Sources/AppState.swift` | Shared holder for the services |
 | `Sources/CountdownCard.swift` | One 340×160 card. Information only, no controls |
-| `Sources/ScrollWheel.swift` | One scroll gesture advances exactly one card |
 | `Sources/TickEngine.swift` | One-second heartbeat, drives display refresh only |
 | `Sources/SettingsView.swift` | Settings panel |
 | `Sources/TimeFormat.swift` | Countdown text formatting rules |

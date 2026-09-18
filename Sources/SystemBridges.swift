@@ -29,6 +29,18 @@ enum NSWorkspaceBridge {
         NSWorkspace.shared.open(url)
     }
 
+    /// 打开系统日历。先按 bundle id 找应用，找不到再退回 ical:// 协议。
+    static func openCalendarApp() {
+        let ws = NSWorkspace.shared
+        if let app = ws.urlForApplication(withBundleIdentifier: "com.apple.iCal") {
+            let cfg = NSWorkspace.OpenConfiguration()
+            cfg.activates = true
+            ws.openApplication(at: app, configuration: cfg, completionHandler: nil)
+            return
+        }
+        if let url = URL(string: "ical://") { ws.open(url) }
+    }
+
     static func quit() {
         NSApplication.shared.terminate(nil)
     }

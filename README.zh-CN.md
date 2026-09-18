@@ -12,6 +12,10 @@ macOS 菜单栏小工具。读你的日历，显示**当前这件事还剩多久
 
 ---
 
+## 系统要求
+
+macOS 26 或更高版本。卡片材质用的是系统的 Liquid Glass，更早的系统上没有这个效果。
+
 ## 安装
 
 ### 方式一：下载 DMG（推荐给所有人）
@@ -31,7 +35,7 @@ brew install --cask --no-quarantine class-countdown
 
 ### 方式三：自己编译
 
-只需要 Xcode Command Line Tools：
+需要 macOS 26 或更高版本，以及 Xcode Command Line Tools：
 
 ```bash
 git clone https://github.com/moonLeak/class-countdown.git
@@ -79,12 +83,25 @@ xattr -dr com.apple.quarantine /Applications/ClassCountdown.app
 
 ### 设置
 
-点菜单栏图标，卡片左下角的齿轮：
+在卡片上右键，选「设置…」：
 
+- **界面语言**：11 种语言，只管软件自身的文字，日程名称永远按日历原文。
+  改完当场生效，不用重启
 - **日历**：勾选哪些日历参与倒计时（比如只要课表，排除生日和节假日）
 - **全天事件**：默认不算，否则「生日」会占据一整天
-- **警示色**：剩余多久时数字和进度条变色，默认 5 分钟
-- **开机自启**
+- **菜单栏**：显示名称与时间还是只显示时间，以及两者之间的分隔符
+  （预设或自定义，带实时预览）
+- **临近结束警示**：剩余多久时进度条转橙，默认 5 分钟
+- **登录时打开**
+
+### 操作
+
+| 操作 | 结果 |
+| --- | --- |
+| 点菜单栏图标 | 卡片从图标里长出来，再点一次原路缩回去 |
+| 单击卡片 | 展开整叠，再点一次收起 |
+| 右键卡片 | 打开日历、设置、关于、退出 |
+| 二段重按卡片（触控板） | 卡片下沉，跳转日历，面板随后收回 |
 
 ---
 
@@ -101,13 +118,16 @@ xattr -dr com.apple.quarantine /Applications/ClassCountdown.app
 
 | 文件 | 职责 |
 | --- | --- |
-| `Sources/App.swift` | 入口，MenuBarExtra 场景与菜单栏那行文字 |
+| `Sources/App.swift` | 入口与 app delegate |
+| `Sources/PanelController.swift` | 菜单栏项、透明面板、出场收回动效、设置窗口 |
 | `Sources/DesignTokens.swift` | 设计定下的全部数值，以及玻璃材质 |
 | `Sources/CalendarService.swift` | EventKit 封装：权限、48 小时窗口拉取、变更监听 |
 | `Sources/ScheduleModel.swift` | 状态机：哪些日程正在进行、剩余秒数、进度比例 |
 | `Sources/CardStack.swift` | 弹出面板：卡包式堆叠、展开、右键菜单 |
+| `Sources/Interaction.swift` | 单击与二段重按，同一个 NSView 接住，只作用于被按的那张卡 |
+| `Sources/Localization.swift` | 运行时文案表，11 种语言，切换不用重启 |
+| `Sources/AppState.swift` | 各服务的共同持有者 |
 | `Sources/CountdownCard.swift` | 单张 340×160 卡片，只有信息，没有控件 |
-| `Sources/ScrollWheel.swift` | 一次滚动手势只换一张卡 |
 | `Sources/TickEngine.swift` | 每秒心跳，只驱动显示刷新 |
 | `Sources/SettingsView.swift` | 设置面板 |
 | `Sources/TimeFormat.swift` | 倒计时文本格式规则 |
@@ -131,7 +151,7 @@ xattr -dr com.apple.quarantine /Applications/ClassCountdown.app
 
 **重叠日程堆成一叠卡包。** 一个日程就是一张卡，不再把它们压缩成一行小字。
 最前面那张完整显示，后面的往下露出 40 点，刚好够读完名称和百分比。
-单击展开，滚轮换到下一张，右键出应用菜单。
+单击展开收起，右键出应用菜单。
 
 **进度条用日程所属日历的颜色。** 橙色专门留给临近结束的警示，
 所以警示除了换色还会提高填充浓度，万一某个日历本身就是橙色，状态变化仍然读得出来。

@@ -8,7 +8,7 @@ cd "$(dirname "$0")"
 APP_NAME="ClassCountdown"
 BUILD_DIR="build"
 APP="$BUILD_DIR/$APP_NAME.app"
-TARGET="$(uname -m)-apple-macos14.0"
+TARGET="$(uname -m)-apple-macos26.0"
 
 echo "==> 清理"
 rm -rf "$BUILD_DIR"
@@ -28,6 +28,8 @@ swiftc \
 
 echo "==> 组装 bundle"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
+# 把编译时刻写进版本号，运行时能读出来，用于确认跑的是哪一次产物
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(date '+%m%d-%H%M%S')" "$APP/Contents/Info.plist"
 
 echo "==> 临时签名 (ad-hoc)"
 # 日历权限需要稳定的签名标识，否则每次重建都会重新弹权限窗。

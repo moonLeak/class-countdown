@@ -42,8 +42,17 @@ enum TimeFormat {
         title.count <= limit ? title : String(title.prefix(limit)) + "…"
     }
 
-    /// 菜单栏那一行：名称与剩余时间之间用斜杠分隔
-    static func menuBar(title: String, time: String, showTitle: Bool) -> String {
-        showTitle ? "\(truncate(title)) / \(time)" : time
+    /// 菜单栏那一行：名称与剩余时间之间用分隔符隔开。
+    /// 分隔符两侧各补一个空格，空白类的分隔符除外——
+    /// 那种本来就是靠空白断开的，再补两边会散成三段。
+    static func menuBar(title: String, time: String, showTitle: Bool,
+                        separator: String) -> String {
+        guard showTitle else { return time }
+        let raw = separator
+        if raw.trimmingCharacters(in: .whitespaces).isEmpty {
+            let gap = raw.isEmpty ? " " : raw
+            return "\(truncate(title))\(gap)\(time)"
+        }
+        return "\(truncate(title)) \(raw) \(time)"
     }
 }
