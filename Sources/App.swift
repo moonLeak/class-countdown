@@ -29,10 +29,7 @@ struct ClassCountdownApp: App {
     var body: some Scene {
         // .window 样式才能放自定义 SwiftUI 视图；默认的 .menu 只能放菜单项。
         MenuBarExtra {
-            CountdownCard(model: model,
-                          tick: tick,
-                          settings: settings,
-                          calendarService: calendarService)
+            CardStack(model: model, tick: tick, calendarService: calendarService)
         } label: {
             MenuBarLabel(model: model, tick: tick, settings: settings)
         }
@@ -44,7 +41,7 @@ struct ClassCountdownApp: App {
     }
 }
 
-/// 菜单栏那一行文字（需求 5.2 末段）。
+/// 菜单栏那一行文字
 struct MenuBarLabel: View {
     @ObservedObject var model: ScheduleModel
     @ObservedObject var tick: TickEngine
@@ -56,16 +53,18 @@ struct MenuBarLabel: View {
             Image(systemName: "calendar.badge.exclamationmark")
         case .empty:
             Image(systemName: "calendar")
-        case .running(let e):
-            Text(compose(e.title, TimeFormat.countdown(model.remaining(now: tick.now))))
+        case .running(let list):
+            if let e = list.first {
+                Text(TimeFormat.menuBar(
+                    title: e.title,
+                    time: TimeFormat.countdown(model.remaining(e, now: tick.now)),
+                    showTitle: settings.showsTitleInMenuBar))
+            }
         case .upcoming(let e):
-            Text(compose(e.title, "↑" + TimeFormat.countdown(model.remaining(now: tick.now))))
+            Text(TimeFormat.menuBar(
+                title: e.title,
+                time: "↑" + TimeFormat.countdown(model.remaining(e, now: tick.now, counting: true)),
+                showTitle: settings.showsTitleInMenuBar))
         }
-    }
-
-    private func compose(_ title: String, _ time: String) -> String {
-        settings.showTitleInMenuBar
-            ? "\(TimeFormat.truncate(title)) · \(time)"
-            : time
     }
 }

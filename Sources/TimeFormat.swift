@@ -1,11 +1,9 @@
 import Foundation
 
-/// 需求 5.2 的固定格式规则。不提供自定义。
+/// 设计画布 v6.3 定下的固定格式，不提供自定义。
 enum TimeFormat {
 
-    /// >= 24h  -> "1d 3:05"
-    /// >= 1h   -> "1:23:47"
-    /// <  1h   -> "23:47"
+    /// >= 24h -> "1d 3:05" ／ >= 1h -> "1:23:47" ／ < 1h -> "23:47"
     static func countdown(_ seconds: TimeInterval) -> String {
         let total = max(0, Int(seconds.rounded(.down)))
         let d = total / 86400
@@ -24,10 +22,19 @@ enum TimeFormat {
     }
 
     static func clock(_ date: Date) -> String {
+        clockFormatter.string(from: date)
+    }
+
+    /// DateFormatter 构造开销不小，倒计时每秒都在刷新，缓存一个
+    private static let clockFormatter: DateFormatter = {
         let f = DateFormatter()
         f.locale = .current
         f.setLocalizedDateFormatFromTemplate("jm")   // 跟随系统 12/24 小时制
-        return f.string(from: date)
+        return f
+    }()
+
+    static func percent(_ p: Double) -> String {
+        "\(Int((p * 100).rounded()))%"
     }
 
     /// 菜单栏标题截断
@@ -35,7 +42,8 @@ enum TimeFormat {
         title.count <= limit ? title : String(title.prefix(limit)) + "…"
     }
 
-    static func percent(_ p: Double) -> String {
-        "\(Int((p * 100).rounded()))%"
+    /// 菜单栏那一行：名称与剩余时间之间用斜杠分隔
+    static func menuBar(title: String, time: String, showTitle: Bool) -> String {
+        showTitle ? "\(truncate(title)) / \(time)" : time
     }
 }

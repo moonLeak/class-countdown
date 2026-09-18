@@ -112,14 +112,18 @@ Click the menu bar item, then the gear in the card's bottom-left corner:
 | File | Responsibility |
 | --- | --- |
 | `Sources/App.swift` | Entry point, MenuBarExtra scene, the menu bar line |
+| `Sources/DesignTokens.swift` | Every number the design settled on, plus the glass material |
 | `Sources/CalendarService.swift` | EventKit wrapper: access, 48-hour window, change notifications |
-| `Sources/ScheduleModel.swift` | State machine: which event is "current," seconds left, progress |
+| `Sources/ScheduleModel.swift` | State machine: which events are running, seconds left, progress |
+| `Sources/CardStack.swift` | The popover: Wallet-style stack, expand, context menu |
+| `Sources/CountdownCard.swift` | One 340×160 card. Information only, no controls |
+| `Sources/ScrollWheel.swift` | One scroll gesture advances exactly one card |
 | `Sources/TickEngine.swift` | One-second heartbeat, drives display refresh only |
-| `Sources/CountdownCard.swift` | The 280pt square card |
 | `Sources/SettingsView.swift` | Settings panel |
 | `Sources/TimeFormat.swift` | Countdown text formatting rules |
 | `build.sh` | Compile and assemble the .app |
 | `package.sh` | Package into a .dmg |
+| `uninstall.sh` | Remove the app, its preferences and the login item |
 
 ### A few design decisions
 
@@ -137,6 +141,16 @@ recomputes from the current time.
 
 **Overlapping events resolve to whichever ends first**, since that's the one
 that actually releases you. The card notes how many others overlap.
+
+**Overlapping events stack like cards in Wallet.** Each event is one card, so
+nothing is summarised away into a line of small print. The front card sits on
+top and shows everything; the ones behind peek out 40pt below it, just enough
+for their name and percentage. Click to expand, scroll to bring another to the
+front, right-click for the app menu.
+
+**The progress bar takes its colour from the event's calendar.** Orange is
+reserved for the closing-minutes warning, which is why the warning also raises
+the fill opacity — a calendar that happens to be orange still reads as changed.
 
 **Recurring events come from `enumerateEvents`**, already expanded into
 instances. Not parsing RRULE by hand is the main reason this uses EventKit

@@ -1,29 +1,29 @@
 import Foundation
 import EventKit
+import SwiftUI
 import Combine
 
-/// 当前日程状态机。文档 8.1 中的 EventStore 模块。
-/// 输入：CalendarService 的事件列表 + SettingsStore 的筛选 + TickEngine 的当前时间。
-/// 输出：卡片和菜单栏要显示的一切。
+/// 当前日程状态机。
+/// v6.3 起重叠日程全部返回，由界面堆成一叠，不再只挑一个出来。
 @MainActor
 final class ScheduleModel: ObservableObject {
 
     enum Phase: Equatable {
-        /// 正在进行中的日程，倒计时到结束。
-        case running(EventSnapshot)
-        /// 没有进行中的日程，倒计时到下一个开始。
+        /// 正在进行的日程，按结束时间升序：最先释放你的排在最前
+        case running([EventSnapshot])
+        /// 没有进行中的，倒数到下一个开始
         case upcoming(EventSnapshot)
-        /// 窗口内什么都没有。
         case empty
-        /// 没有日历权限。
         case needsAccess
     }
 
-    struct EventSnapshot: Equatable {
+    struct EventSnapshot: Equatable, Identifiable {
         let id: String
         let title: String
         let start: Date
         let end: Date
+        /// 所属日历的颜色，进度条直接用它
+        let calendarColor: Color
 
         static func == (a: EventSnapshot, b: EventSnapshot) -> Bool {
             a.id == b.id && a.start == b.start && a.end == b.end
@@ -31,14 +31,11 @@ final class ScheduleModel: ObservableObject {
     }
 
     @Published private(set) var phase: Phase = .needsAccess
-    /// 与当前日程时间重叠、但被优先级规则排掉的日程数量。
-    @Published private(set) var overlapCount: Int = 0
 
     private let calendarService: CalendarService
     private let settings: SettingsStore
-    private var bag = Set<AnyCancellable>()
-
     private let tick: TickEngine
+    private var bag = Set<AnyCancellable>()
 
     init(calendarService: CalendarService, settings: SettingsStore, tick: TickEngine) {
         self.calendarService = calendarService
@@ -46,10 +43,9 @@ final class ScheduleModel: ObservableObject {
         self.tick = tick
     }
 
-    /// 建立订阅。同 CalendarService：不能放在 init 里，
-    /// init 期间 self 尚未完成初始化，逃逸到闭包里编译器会拒绝。
+    /// 建立订阅。不能放在 init 里：init 期间 self 尚未完成初始化，
+    /// 逃逸到闭包里编译器会拒绝。
     func start() {
-        // 三个来源任一变化都重算。重算只是遍历几十条事件，开销可忽略。
         tick.$now
             .combineLatest(calendarService.$events, calendarService.$access)
             .sink { [weak self] now, events, access in
@@ -74,42 +70,35 @@ final class ScheduleModel: ObservableObject {
 
     private func recompute(now: Date, events: [EKEvent], access: CalendarService.Access) {
         guard access == .granted else {
-            set(.needsAccess, overlaps: 0)
+            set(.needsAccess)
             return
         }
 
         let pool = events.filter { keep($0) }
 
-        // 正在进行：start <= now < end
-        let running = pool.filter { ev in
-            guard let s = ev.startDate, let e = ev.endDate else { return false }
-            return s <= now && now < e
-        }
+        let running = pool
+            .filter { ev in
+                guard let s = ev.startDate, let e = ev.endDate else { return false }
+                return s <= now && now < e
+            }
+            .sorted { ($0.endDate ?? .distantFuture) < ($1.endDate ?? .distantFuture) }
 
         if !running.isEmpty {
-            // 重叠时取最先结束的那个，也就是最先释放用户的那件事。
-            let winner = running.min { lhs, rhs in
-                (lhs.endDate ?? .distantFuture) < (rhs.endDate ?? .distantFuture)
-            }!
-            set(.running(snapshot(winner)), overlaps: running.count - 1)
+            set(.running(running.map(snapshot)))
             return
         }
 
-        // 没有进行中的，找下一个开始的
-        let upcoming = pool
+        let next = pool
             .filter { ($0.startDate ?? .distantPast) > now }
             .min { ($0.startDate ?? .distantFuture) < ($1.startDate ?? .distantFuture) }
 
-        // 显式写 Phase，闭包里的 .upcoming 简写有时推断不出来
-        let next: Phase = upcoming.map { Phase.upcoming(snapshot($0)) } ?? Phase.empty
-        set(next, overlaps: 0)
+        set(next.map { Phase.upcoming(snapshot($0)) } ?? Phase.empty)
     }
 
-    /// 心跳每 0.5 秒来一次，但 phase 只在真正变化时赋值，
-    /// 否则 SwiftUI 会为没变的内容重绘整张卡片。
-    private func set(_ newPhase: Phase, overlaps: Int) {
+    /// 心跳每 0.5 秒来一次，phase 只在真正变化时赋值，
+    /// 否则 SwiftUI 会为没变的内容重绘整叠卡片。
+    private func set(_ newPhase: Phase) {
         if phase != newPhase { phase = newPhase }
-        if overlapCount != overlaps { overlapCount = overlaps }
     }
 
     private func keep(_ event: EKEvent) -> Bool {
@@ -121,38 +110,43 @@ final class ScheduleModel: ObservableObject {
     }
 
     private func snapshot(_ event: EKEvent) -> EventSnapshot {
-        EventSnapshot(
+        let cg = event.calendar?.cgColor ?? CGColor(red: 0.04, green: 0.52, blue: 1, alpha: 1)
+        return EventSnapshot(
             id: event.calendarItemIdentifier,
             title: (event.title?.isEmpty == false ? event.title! : "（无标题）"),
             start: event.startDate,
-            end: event.endDate
+            end: event.endDate,
+            calendarColor: Color(cgColor: cg)
         )
     }
 
     // MARK: - 派生值
 
     /// 剩余秒数 r = max(0, target - now)
-    func remaining(now: Date) -> TimeInterval {
-        switch phase {
-        case .running(let e):  return max(0, e.end.timeIntervalSince(now))
-        case .upcoming(let e): return max(0, e.start.timeIntervalSince(now))
-        case .empty, .needsAccess: return 0
-        }
+    func remaining(_ e: EventSnapshot, now: Date, counting toStart: Bool = false) -> TimeInterval {
+        max(0, (toStart ? e.start : e.end).timeIntervalSince(now))
     }
 
-    /// 进度 p = (now - start) / (end - start)，夹在 [0, 1]。
-    /// upcoming 阶段没有天然的分母，返回 0，卡片背景保持空。
-    func progress(now: Date) -> Double {
-        guard case .running(let e) = phase else { return 0 }
+    /// 进度 p = (now - start) / (end - start)，夹在 [0, 1]
+    func progress(_ e: EventSnapshot, now: Date) -> Double {
         let span = e.end.timeIntervalSince(e.start)
-        guard span > 0 else { return 1 }   // 零时长日程，直接算满
-        let done = now.timeIntervalSince(e.start) / span
-        return min(1, max(0, done))
+        guard span > 0 else { return 1 }          // 零时长日程直接算满
+        return min(1, max(0, now.timeIntervalSince(e.start) / span))
     }
 
-    var currentEventID: String? {
+    /// 临近结束：进度条整条转橙，见设计画布 v6.1 的定案
+    func isWarning(_ e: EventSnapshot, now: Date) -> Bool {
+        let threshold = settings.warnSeconds
+        guard threshold > 0 else { return false }
+        let left = e.end.timeIntervalSince(now)
+        return left > 0 && left <= Double(threshold)
+    }
+
+    /// 菜单栏那行文字要用的那一个日程
+    var frontEvent: EventSnapshot? {
         switch phase {
-        case .running(let e), .upcoming(let e): return e.id
+        case .running(let list): return list.first
+        case .upcoming(let e): return e
         case .empty, .needsAccess: return nil
         }
     }

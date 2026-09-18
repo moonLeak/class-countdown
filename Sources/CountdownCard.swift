@@ -1,182 +1,123 @@
 import SwiftUI
 
-/// 需求 5.1：280pt 正方形卡片。
-/// 三层：底层横向进度条背景、中层内容、顶层悬停才显现的操作图标。
+/// 单张日程卡。340×160，内部只有信息，一个控件都没有。
+/// 操作入口在整叠的右键菜单上，见 CardStack。
 struct CountdownCard: View {
 
-    @ObservedObject var model: ScheduleModel
-    @ObservedObject var tick: TickEngine
-    @ObservedObject var settings: SettingsStore
-    @ObservedObject var calendarService: CalendarService
+    let event: ScheduleModel.EventSnapshot
+    let now: Date
+    let progress: Double
+    let warning: Bool
+    /// 倒计时与底部行在收起状态下要不要显示。
+    /// 被压住的卡只留名称，否则半透明玻璃会把下层的大数字透上来。
+    let showsDetail: Bool
+    /// 被压住时名称移到左下角，因为能看见的只有底边那一条
+    let titleAtBottom: Bool
+    /// 待开始状态下数字上方那行小字
+    var subtitle: String? = nil
+    /// 倒计时文本，由外部算好传进来
+    let countdown: String
 
-    @State private var hovering = false
-
-    private let side: CGFloat = 280
-
-    private var now: Date { tick.now }
-    private var remaining: TimeInterval { model.remaining(now: now) }
-    private var progress: Double { model.progress(now: now) }
-    private var isWarning: Bool {
-        if case .running = model.phase { return remaining <= Double(settings.warnSeconds) }
-        return false
-    }
+    private var barColor: Color { warning ? DS.warn : event.calendarColor }
+    private var fillTop: Double { warning ? DS.warnFillTop : DS.fillTop }
+    private var fillBottom: Double { warning ? DS.warnFillBottom : DS.fillBottom }
+    private var edgeAlpha: Double { warning ? DS.warnEdgeAlpha : DS.edgeAlpha }
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            progressBackground
+            progressLayer
             content
         }
-        .frame(width: side, height: side)
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .onHover { hovering = $0 }
+        .frame(width: DS.cardW, height: DS.cardH)
+        // clipShape 套在整个 ZStack 外面：进度条走到边缘时不会露出直角
+        .glassCard()
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text("\(event.title)，\(countdown)"))
     }
 
-    // MARK: 背景层
+    // MARK: 背景进度条
 
-    private var progressBackground: some View {
+    private var progressLayer: some View {
         GeometryReader { geo in
+            let w = geo.size.width * progress
             ZStack(alignment: .leading) {
                 Color.clear
+                LinearGradient(
+                    colors: [barColor.opacity(fillTop), barColor.opacity(fillBottom)],
+                    startPoint: .top, endPoint: .bottom
+                )
+                .frame(width: w)
+                // 右缘那道亮线是 Liquid Glass 的折射感来源
                 Rectangle()
-                    .fill(isWarning ? Color.orange.opacity(0.28) : Color.accentColor.opacity(0.22))
-                    .frame(width: geo.size.width * progress)
-                    .animation(.linear(duration: 0.5), value: progress)
+                    .fill(barColor.opacity(edgeAlpha))
+                    .frame(width: 1)
+                    .offset(x: w)
             }
+            .animation(DS.motion, value: progress)
+            .animation(DS.fade, value: warning)
         }
     }
 
-    // MARK: 内容层
+    // MARK: 内容
 
-    @ViewBuilder
     private var content: some View {
-        switch model.phase {
-        case .needsAccess: accessPrompt
-        case .empty:       emptyState
-        case .running(let e):  eventBody(e, label: nil)
-        case .upcoming(let e): eventBody(e, label: "开始于 \(TimeFormat.clock(e.start))")
-        }
-    }
-
-    private func eventBody(_ e: ScheduleModel.EventSnapshot, label: String?) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // 顶部：日程标题
-            Text(e.title)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(.secondary)
-                .lineLimit(2)
-                .multilineTextAlignment(.leading)
-
-            if model.overlapCount > 0 {
-                Text("还有 \(model.overlapCount) 个重叠日程")
-                    .font(.system(size: 10))
-                    .foregroundStyle(.tertiary)
-                    .padding(.top, 2)
-            }
-
-            Spacer()
-
-            // 中部：倒计时主体
-            VStack(alignment: .leading, spacing: 2) {
-                if let label {
-                    Text(label)
-                        .font(.system(size: 11))
-                        .foregroundStyle(.tertiary)
+        ZStack(alignment: .topLeading) {
+            // 名称：展开时在左上，被压住时在左下并带上百分比
+            VStack {
+                if titleAtBottom { Spacer() }
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                    Text(event.title)
+                        .font(.system(size: DS.fBody, weight: DS.wBody))
+                        .foregroundStyle(DS.l2)
+                        .lineLimit(1)
+                    if titleAtBottom {
+                        Spacer()
+                        Text(TimeFormat.percent(progress))
+                            .font(.system(size: DS.fCaption, weight: DS.wCaption))
+                            .foregroundStyle(DS.l3)
+                            .monospacedDigit()
+                    }
                 }
-                Text(TimeFormat.countdown(remaining))
-                    .font(.system(size: 56, weight: .semibold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(isWarning ? Color.orange : Color.primary)
-                    .contentTransition(.numericText())
+                if !titleAtBottom { Spacer() }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
-            Spacer()
-
-            // 底部：起止时间 + 百分比 + 操作
-            HStack(alignment: .bottom) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(TimeFormat.range(e.start, e.end))
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
+            // 倒计时：绝对居中于卡片高度，所以它的中心就是卡片的中心
+            if showsDetail {
+                VStack(alignment: .leading, spacing: 2) {
+                    if let subtitle {
+                        Text(subtitle)
+                            .font(.system(size: DS.fCaption, weight: DS.wCaption))
+                            .foregroundStyle(DS.l3)
+                    }
+                    Text(countdown)
+                        .font(.system(size: DS.fDisplay, weight: DS.wDisplay))
                         .monospacedDigit()
-                    actionRow
+                        .foregroundStyle(DS.l1)
+                        .contentTransition(.numericText())
                 }
-                Spacer()
-                // 百分比是进度条的冗余非颜色编码，色觉异常也能读。
-                Text(TimeFormat.percent(progress))
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.secondary)
-                    .monospacedDigit()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            }
+
+            // 底部：起止时间与百分比同一基线
+            if showsDetail {
+                VStack {
+                    Spacer()
+                    HStack(spacing: 10) {
+                        Text(TimeFormat.range(event.start, event.end))
+                            .font(.system(size: DS.fCaption, weight: DS.wCaption))
+                            .foregroundStyle(DS.l3)
+                            .monospacedDigit()
+                        Spacer()
+                        Text(TimeFormat.percent(progress))
+                            .font(.system(size: DS.fCaption, weight: DS.wCaption))
+                            .foregroundStyle(DS.l3)
+                            .monospacedDigit()
+                    }
+                }
             }
         }
-        .padding(20)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text("\(e.title)，还剩 \(TimeFormat.countdown(remaining))"))
-    }
-
-    private var actionRow: some View {
-        HStack(spacing: 10) {
-            SettingsLink {
-                Image(systemName: "gearshape")
-            }
-            .buttonStyle(.plain)
-            .help("设置")
-
-            Button {
-                if let url = URL(string: "ical://") { NSWorkspaceBridge.open(url) }
-            } label: {
-                Image(systemName: "calendar")
-            }
-            .buttonStyle(.plain)
-            .help("打开日历")
-
-            Button {
-                NSWorkspaceBridge.quit()
-            } label: {
-                Image(systemName: "power")
-            }
-            .buttonStyle(.plain)
-            .help("退出")
-        }
-        .font(.system(size: 11))
-        .foregroundStyle(.secondary)
-        .opacity(hovering ? 1 : 0.25)
-        .animation(.easeInOut(duration: 0.15), value: hovering)
-    }
-
-    // MARK: 空状态与权限
-
-    private var emptyState: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("接下来没有日程")
-                .font(.system(size: 16, weight: .medium))
-            Text("未来 48 小时内，勾选的日历里没有事件。")
-                .font(.system(size: 11))
-                .foregroundStyle(.secondary)
-            Spacer()
-            actionRow
-        }
-        .padding(20)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    }
-
-    private var accessPrompt: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("需要日历访问权限")
-                .font(.system(size: 16, weight: .medium))
-            Text("应用只读取日程的标题和起止时间，不会修改任何日程，也不联网。")
-                .font(.system(size: 11))
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            HStack(spacing: 8) {
-                Button("请求权限") { calendarService.requestAccess() }
-                Button("打开系统设置") { NSWorkspaceBridge.openCalendarPrivacySettings() }
-            }
-            .controlSize(.small)
-            Spacer()
-            actionRow
-        }
-        .padding(20)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(.horizontal, DS.padX)
+        .padding(.vertical, DS.padY)
     }
 }

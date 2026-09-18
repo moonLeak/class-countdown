@@ -102,14 +102,18 @@ xattr -dr com.apple.quarantine /Applications/ClassCountdown.app
 | 文件 | 职责 |
 | --- | --- |
 | `Sources/App.swift` | 入口，MenuBarExtra 场景与菜单栏那行文字 |
+| `Sources/DesignTokens.swift` | 设计定下的全部数值，以及玻璃材质 |
 | `Sources/CalendarService.swift` | EventKit 封装：权限、48 小时窗口拉取、变更监听 |
-| `Sources/ScheduleModel.swift` | 状态机：谁是「当前日程」、剩余秒数、进度比例 |
+| `Sources/ScheduleModel.swift` | 状态机：哪些日程正在进行、剩余秒数、进度比例 |
+| `Sources/CardStack.swift` | 弹出面板：卡包式堆叠、展开、右键菜单 |
+| `Sources/CountdownCard.swift` | 单张 340×160 卡片，只有信息，没有控件 |
+| `Sources/ScrollWheel.swift` | 一次滚动手势只换一张卡 |
 | `Sources/TickEngine.swift` | 每秒心跳，只驱动显示刷新 |
-| `Sources/CountdownCard.swift` | 280pt 方形卡片 |
 | `Sources/SettingsView.swift` | 设置面板 |
 | `Sources/TimeFormat.swift` | 倒计时文本格式规则 |
 | `build.sh` | 编译并组装 .app |
 | `package.sh` | 打包成 .dmg |
+| `uninstall.sh` | 卸载应用、偏好设置与登录项 |
 
 ### 几个设计决定
 
@@ -124,6 +128,13 @@ xattr -dr com.apple.quarantine /Applications/ClassCountdown.app
 
 **重叠日程取最先结束的那个**，也就是最先把你放走的那件事，
 卡片上会标注还有几个重叠。
+
+**重叠日程堆成一叠卡包。** 一个日程就是一张卡，不再把它们压缩成一行小字。
+最前面那张完整显示，后面的往下露出 40 点，刚好够读完名称和百分比。
+单击展开，滚轮换到下一张，右键出应用菜单。
+
+**进度条用日程所属日历的颜色。** 橙色专门留给临近结束的警示，
+所以警示除了换色还会提高填充浓度，万一某个日历本身就是橙色，状态变化仍然读得出来。
 
 **重复日程用 `enumerateEvents` 拿展开后的实例**，不自己解析 RRULE。
 这是选 EventKit 而不是自己解析 `.ics` 的主要原因。
