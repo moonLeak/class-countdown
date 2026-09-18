@@ -32,17 +32,22 @@ final class CalendarService: ObservableObject {
         changeObserver = NotificationCenter.default.addObserver(
             forName: .EKEventStoreChanged, object: store, queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in self?.reload() }
+            // 必须先解包成 let：Task 的闭包是并发的，
+            // 里面不能引用被捕获的 var（weak self 就是个 var）。
+            guard let self else { return }
+            Task { @MainActor in self.reload() }
         }
 
         // 兜底轮询：变更通知偶尔不触发（尤其 CalDAV 同步完成时）。
         refreshTimer = Timer.scheduledTimer(withTimeInterval: 15 * 60, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.reload() }
+            guard let self else { return }
+            Task { @MainActor in self.reload() }
         }
 
         // 系统唤醒后重新拉取：休眠期间的同步不会补发通知。
         NSWorkspaceNotificationBridge.onWake { [weak self] in
-            Task { @MainActor in self?.reload() }
+            guard let self else { return }
+            Task { @MainActor in self.reload() }
         }
 
         requestAccess()
@@ -53,8 +58,8 @@ final class CalendarService: ObservableObject {
 
     func requestAccess() {
         store.requestFullAccessToEvents { [weak self] granted, _ in
+            guard let self else { return }
             Task { @MainActor in
-                guard let self else { return }
                 self.access = granted ? .granted : .denied
                 if granted { self.reload() }
             }

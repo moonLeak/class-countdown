@@ -19,7 +19,8 @@ final class TickEngine: ObservableObject {
         // 0.5 秒轮询：即便系统偶尔延迟触发，整秒也不会被跳过。
         // 空闲 CPU 影响可忽略，但比 1 秒定时器在边界上稳得多。
         let t = Timer(timeInterval: 0.5, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.now = Date() }
+            guard let self else { return }
+            Task { @MainActor in self.now = Date() }
         }
         // .common 保证下拉菜单打开、窗口拖动时仍然走时。
         RunLoop.main.add(t, forMode: .common)
