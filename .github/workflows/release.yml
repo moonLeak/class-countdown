@@ -1,0 +1,87 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 显示 Swift 版本
+        run: swift --version
+
+      - name: 编译
+        run: ./build.sh
+
+      - name: 打包 DMG
+        run: ./package.sh
+
+      - name: 记录校验和
+        id: hash
+        run: |
+          DMG=$(ls dist/*.dmg)
+          echo "dmg=$DMG" >> "$GITHUB_OUTPUT"
+          echo "sha=$(shasum -a 256 "$DMG" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: 更新 Homebrew Cask
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          sed -i '' \
+            -e "s|version \".*\"|version \"$VERSION\"|" \
+            -e "s|sha256 \".*\"|sha256 \"${{ steps.hash.outputs.sha }}\"|" \
+            -e "s|OWNER_PLACEHOLDER|${{ github.repository_owner }}|g" \
+            Casks/class-countdown.rb
+          cat Casks/class-countdown.rb
+
+      - name: 提交 Cask 更新
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/class-countdown.rb
+          git diff --staged --quiet || git commit -m "chore: cask ${GITHUB_REF_NAME}"
+          git push origin HEAD:${{ github.event.repository.default_branch }}
+
+      - name: 发布 Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.dmg
+          generate_release_notes: true
+          body: |
+            ## Install
+
+            Download the `.dmg` below, open it, and drag the app into Applications.
+
+            **macOS will block it the first time** — this app isn't notarized,
+            because notarization needs a paid Apple Developer account. Pick either:
+
+            - Open it once (it fails), then go to **System Settings → Privacy & Security**,
+              scroll down and click **Open Anyway**.
+            - Or run: `xattr -dr com.apple.quarantine /Applications/ClassCountdown.app`
+
+            The countdown appears in your menu bar; it asks for calendar access on first launch.
+
+            ---
+
+            ## 安装
+
+            下载下面的 `.dmg`，打开后把应用拖进「应用程序」文件夹。
+
+            **首次打开会被 macOS 拦住**，因为这个应用没有花钱买苹果开发者证书做公证。
+            两种放行方式，任选其一：
+
+            - 打开一次（会报错），然后去 **系统设置 → 隐私与安全性**，
+              往下翻找到提示，点 **仍要打开**。
+            - 或者在终端里跑一行：
+              `xattr -dr com.apple.quarantine /Applications/ClassCountdown.app`
+
+            装好后菜单栏会出现倒计时，首次启动会请求日历权限。

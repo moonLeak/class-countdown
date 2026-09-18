@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>ClassCountdown</string>
+    <key>CFBundleDisplayName</key>
+    <string>下课倒计时</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.carson.classcountdown</string>
+    <key>CFBundleExecutable</key>
+    <string>ClassCountdown</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>14.0</string>
+    <key>LSUIElement</key>
+    <true/>
+    <key>NSCalendarsFullAccessUsageDescription</key>
+    <string>读取你的日历，计算当前日程还剩多久结束。数据只留在本机，不上传、不修改任何日程。</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>Carson</string>
+</dict>
+</plist>
