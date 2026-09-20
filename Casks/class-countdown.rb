@@ -1,6 +1,6 @@
 cask "class-countdown" do
-  version "1.0.0"
-  sha256 "df0b83c4b37fb47d50a3ec4249b67ee418ad8730f9da0b82f9b4d84ab3474374"
+  version "1.1.0"
+  sha256 "98e46b25325ba18b7776df27442a7dfed4513477ca8ab48eee6cd2c44b4b694c"
 
   url "https://github.com/moonLeak/class-countdown/releases/download/v#{version}/ClassCountdown-#{version}.dmg"
   name "ClassCountdown"
