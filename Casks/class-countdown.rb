@@ -7,7 +7,7 @@ cask "class-countdown" do
   desc "Menu bar countdown showing how much longer the current calendar event has left"
   homepage "https://github.com/moonLeak/class-countdown"
 
-  depends_on macos: ">= :sonoma"
+  depends_on macos: ">= :tahoe"
 
   app "ClassCountdown.app"
 
