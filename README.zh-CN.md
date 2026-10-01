@@ -130,6 +130,9 @@ xattr -dr com.apple.quarantine /Applications/ClassCountdown.app
 | `Sources/CountdownCard.swift` | 单张 340×160 卡片，只有信息，没有控件 |
 | `Sources/TickEngine.swift` | 每秒心跳，只驱动显示刷新 |
 | `Sources/SettingsView.swift` | 设置面板 |
+| `Sources/SettingsStore.swift` | 用户偏好的持久化 |
+| `Sources/LaunchAtLogin.swift` | 登录时打开 |
+| `Sources/SystemBridges.swift` | 休眠唤醒与时区变更通知的小包装 |
 | `Sources/TimeFormat.swift` | 倒计时文本格式规则 |
 | `build.sh` | 编译并组装 .app |
 | `package.sh` | 打包成 .dmg |

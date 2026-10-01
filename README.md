@@ -141,6 +141,9 @@ Right-click anywhere on the card and choose **Settings…**:
 | `Sources/CountdownCard.swift` | One 340×160 card. Information only, no controls |
 | `Sources/TickEngine.swift` | One-second heartbeat, drives display refresh only |
 | `Sources/SettingsView.swift` | Settings panel |
+| `Sources/SettingsStore.swift` | Persisted user preferences |
+| `Sources/LaunchAtLogin.swift` | Open-at-login toggle |
+| `Sources/SystemBridges.swift` | Wake-from-sleep and time-zone change notifications |
 | `Sources/TimeFormat.swift` | Countdown text formatting rules |
 | `build.sh` | Compile and assemble the .app |
 | `package.sh` | Package into a .dmg |
