@@ -311,7 +311,10 @@ final class SettingsStore: ObservableObject {
         self.writeToCalendar    = defaults.bool(forKey: Key.writeToCalendar)
         self.focusCalendarID    = defaults.string(forKey: Key.focusCalendarID) ?? ""
         self.notifyOnEnd        = defaults.bool(forKey: Key.notifyOnEnd)
-        self.cardClarity        = defaults.double(forKey: Key.cardClarity)
+        // 落到最近的档位上，旧版本存过档位以外的值也能归位
+        let rawClarity = defaults.double(forKey: Key.cardClarity)
+        self.cardClarity        = DS.clarityStops.min { abs($0 - rawClarity) < abs($1 - rawClarity) }
+                                  ?? DS.cardClarityDefault
         self.appearance         = AppAppearance(rawValue: defaults.string(forKey: Key.appearance) ?? "")
                                   ?? .system
         NSApplication.shared.appearance = self.appearance.nsAppearance

@@ -34,8 +34,10 @@ enum DS {
     static let frostLevels: [Material] = [
         .ultraThinMaterial, .thinMaterial, .regularMaterial, .thickMaterial, .ultraThickMaterial
     ]
-    /// 质感滑块的默认位置，0 是最磨砂，1 是最通透
-    static let cardClarityDefault: Double = 0.4
+    /// 质感滑块的五个档位。完整范围 0 是最磨砂，1 是最通透，
+    /// 只开放 0.6 到 1 这一段，再往磨砂那边卡片就接近不透明了
+    static let clarityStops: [Double] = [0.6, 0.7, 0.8, 0.9, 1.0]
+    static let cardClarityDefault: Double = 0.6
     /// clear 玻璃上垫的一层固定遮罩。Apple 对 clear 玻璃的建议做法：
     /// 深色外观垫黑，白字在亮背景上也读得出来；浅色外观垫白，黑字在暗背景上也读得出来。
     /// 浓度固定，不随质感滑块变，所以滑块只改模糊，不改明暗

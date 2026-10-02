@@ -47,7 +47,11 @@ private struct GeneralTab: View {
                     HStack(spacing: 10) {
                         Text(L("appearance.solid"))
                             .font(.system(size: DS.fCaption)).foregroundStyle(.secondary)
-                        Slider(value: $settings.cardClarity, in: 0...1)
+                        // 五档，存的是档位对应的通透程度
+                        Slider(value: Binding(
+                            get: { Double(DS.clarityStops.firstIndex(of: settings.cardClarity) ?? 0) },
+                            set: { settings.cardClarity = DS.clarityStops[Int($0.rounded())] }
+                        ), in: 0...Double(DS.clarityStops.count - 1), step: 1)
                         Text(L("appearance.clear"))
                             .font(.system(size: DS.fCaption)).foregroundStyle(.secondary)
                     }
