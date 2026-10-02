@@ -21,7 +21,7 @@
 
 ## 2. 已落地的代码改动
 
-1. `DS.peek` 由 40 改为 27。后卡露出条内，名称与百分比垂直居中。实现方式：`CountdownCard` 增加 `collapsedScale`，收起态文字行放在 padding 之外的底部 overlay，条高为 `peek / collapsedScale`。原因：后卡被 `scaleEffect(anchor: .bottom)` 缩小，肉眼看到的那一条在缩放后高度恰为 `peek`，换算回卡片自身坐标需要除以缩放比例。
+1. `DS.peek` 由 40 改为 27。后卡露出条内，名称与百分比垂直居中。实现方式：`EventCard` 增加 `collapsedScale`，收起态文字行放在 padding 之外的底部 overlay，条高为 `peek / collapsedScale`。原因：后卡被 `scaleEffect(anchor: .bottom)` 缩小，肉眼看到的那一条在缩放后高度恰为 `peek`，换算回卡片自身坐标需要除以缩放比例。
 2. 右键菜单栏图标：`sendAction(on: [.leftMouseUp, .rightMouseUp])`，在 `togglePanel` 里用 `NSApp.currentEvent?.type == .rightMouseUp` 分流，弹出 `NSMenu`（打开日历、设置、关于、退出），面板若已打开先收起。
 3. 菜单栏图标：新增 `Sources/RingIcon.swift`，绘制浅灰轨道加进度弧的 template image，从 12 点钟顺时针。进行中显示事件进度，即将开始显示空环。
 
@@ -87,6 +87,17 @@
 - 标题形如“专注 · 学业”，`availability = .free`，不占用忙闲。
 - notes 写入固定前缀与本地记录 ID，用于识别。
 - 应用读取日程时按标记过滤自己写入的事件，不是整日历排除，避免用户把专注事件写进自己常看的日历后，倒计时卡把它当成课程显示。
+
+### 4.3.1 实现状态与待实测
+
+已实现：写入（`FocusCalendarWriter`）、标记与过滤（`FocusCalendarMarker`，标记函数有单测）、
+设置里的开关和目标日历、权限文案。尚未在真实日历下实测，需要完整日历访问权限：
+
+- 完成一段专注后，系统日历里是否出现标为“空闲”的事件
+- 在 Google 账号为默认日历的机器上，新建“专注”日历是否被允许。代码的回退顺序是默认日历所在账号，
+  再试 iCloud（CalDAV），最后本地
+- Notion Calendar 是否能读到这些事件（它读云端账号，不读本机库）
+- 倒计时卡是否确实不显示这些事件
 
 ### 4.4 权限与文案
 
@@ -227,9 +238,9 @@
 
 工程：
 
-19. 当前工作区有 5 个未提交的 Swift 改动（`DesignTokens`、`CountdownCard`、`CardStack`、`PanelController`、`RingIcon`），保留并提交还是回退。其中 `peek` 为 27，规范为 21。
+19. 当前工作区有 5 个未提交的 Swift 改动（`DesignTokens`、`EventCard`、`CardStack`、`PanelController`、`RingIcon`），保留并提交还是回退。其中 `peek` 为 27，规范为 21。
 20. 开发代号（`kittiwake`、`omura`、`audouin`）与 bundle id `com.carson.<代号>`。
-21. 组件改名（`CountdownCard` 改 `EventCard`）与新目录结构，何时做。
+21. 组件改名（`EventCard` 改 `EventCard`）与新目录结构，何时做。
 22. 测试范围：`FocusEngine` 单测（状态机、合盖、意外退出补记），UI 靠手测。
 23. 无障碍：VoiceOver 标签、减弱动态效果、橙色警示上白字的对比度。
 24. 中英文文案表（`L()`）新增 key 的维护方式。

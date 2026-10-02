@@ -7,7 +7,7 @@
 
 ## 0. 起点
 
-- 工作区有 5 个未提交改动：`DesignTokens.swift`、`CountdownCard.swift`、`CardStack.swift`、`PanelController.swift`，以及新文件 `RingIcon.swift`。内容见 `docs/DESIGN-v7-focus.md` 第 2 节（后卡露出条居中、右键菜单栏图标弹菜单、菜单栏进度环）。
+- 工作区有 5 个未提交改动：`DesignTokens.swift`、`EventCard.swift`、`CardStack.swift`、`PanelController.swift`，以及新文件 `RingIcon.swift`。内容见 `docs/DESIGN-v7-focus.md` 第 2 节（后卡露出条居中、右键菜单栏图标弹菜单、菜单栏进度环）。
 - 这些改动已经过设计确认，但还没在本机编译验证。第一步先编译、验证、单独提交（见阶段 0）。
 - `docs/` 目录是新增的，里面的文档和原型一并提交。
 - 仓库没有测试目标。`build.sh` 是 `swiftc` 一条命令。给 `FocusEngine` 写单测需要新增 `Package.swift` 或单独的测试脚本，见阶段 3。
@@ -89,7 +89,7 @@
 
 | 项 | 做法 |
 |---|---|
-| `FlowCard` | 新视图，与 `EventCard`（现 `CountdownCard`）共用骨架。标题、大数字、进度填充、底行。专注与休息、长休息三种变体，状态与按钮见 DESIGN-SPEC 3.3 的按钮表 |
+| `FlowCard` | 新视图，与 `EventCard`（现 `EventCard`）共用骨架。标题、大数字、进度填充、底行。专注与休息、长休息三种变体，状态与按钮见 DESIGN-SPEC 3.3 的按钮表 |
 | 底行 | 左：`CycleDots`（圆点 8，当前节 26，间距 6），其后重置与统计两个图标按钮（热区 28，间距与点组一致）。空闲时四个点一样大，进行中一个点拉长，图标跟着右移。右：主按钮 92×32，距右下各 12 |
 | 按钮 | `Start`、`Resume` 绿（`DS.Color.focus` 55%），`Pause` 与 `Skip` 为透明灰（白 12%）。休息等待时 `Skip`（64×32）在 `Start` 左边，间距 8。休息中只有 `Skip`，没有暂停 |
 | 休息卡文案 | 标题轮换：Take a Break、Go for a Walk、Look Into the Distance、Stretch Your Legs、Step Away from the Screen。长休息固定 Take a Long Break |
@@ -150,7 +150,7 @@
 | 无障碍 | 图标按钮 `accessibilityLabel`，减弱动态效果时缩短或关闭位移动画 |
 | 文案 | 所有新增文案走 `L()`，补中英文 |
 | 文档 | 更新 README（中英）、`docs/DESIGN-SPEC.md` 里与实现有出入的数值 |
-| 命名整理 | 按 DESIGN-SPEC 5.2，`CountdownCard` 改名 `EventCard`，`CountdownCard.swift` 改 `EventCard.swift` |
+| 命名整理 | 按 DESIGN-SPEC 5.2，`EventCard` 改名 `EventCard`，`EventCard.swift` 改 `EventCard.swift` |
 | 版本 | 升到 1.2.0，更新 Cask 前先问本人 |
 
 ## 3. 默认决定（用户尚未回答的未决问题）

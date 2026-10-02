@@ -38,6 +38,10 @@ struct CardStack: View {
     /// 出场退场与展开状态都由控制器持有：面板窗口复用，视图不重建，
     /// 放在 @State 里一旦漏掉一次事件就再也回不到正确的那一帧。
     @ObservedObject var presentation: PanelPresentation
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    /// 系统开了“减弱动态效果”时，位移动画缩短成一个很快的淡入淡出
+    private var motion: Animation { reduceMotion ? .easeInOut(duration: 0.12) : DS.motion }
 
     /// 二段重按的下沉反馈，只作用在被按的那一张上
     @State private var pressedIndex: Int? = nil
@@ -155,7 +159,7 @@ struct CardStack: View {
     private func interaction(_ index: Int, count: Int, draggable: Bool = false) -> some View {
         InteractionArea(
             onClick: {
-                withAnimation(DS.motion) { presentation.expanded.toggle() }
+                withAnimation(motion) { presentation.expanded.toggle() }
             },
             onForceClick: {
                 // 三拍，顺序不能乱：先让手指感觉到卡片沉下去，
@@ -172,7 +176,7 @@ struct CardStack: View {
             onDrag: (draggable && expanded) ? { dy, finished in
                 if finished {
                     let slot = liveSlot(startIndex: drag?.startIndex ?? index, dy: dy, count: count)
-                    withAnimation(DS.motion) {
+                    withAnimation(motion) {
                         settings.flowCardSlot = slot >= count - 1 ? -1 : slot
                         drag = nil
                     }
@@ -215,7 +219,7 @@ struct CardStack: View {
 
     /// 整叠展开并让 Flow 卡亮一下，帮用户找到它
     private func locateFlow() {
-        withAnimation(DS.motion) { presentation.expanded = true }
+        withAnimation(motion) { presentation.expanded = true }
         withAnimation(DS.fade) { flowHighlight = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
             withAnimation(DS.fade) { flowHighlight = false }
@@ -261,7 +265,7 @@ struct CardStack: View {
     private func card(_ item: StackItem, index i: Int, count n: Int, fullness: Double) -> some View {
         switch item {
         case .event(let e, let toStart):
-            CountdownCard(
+            EventCard(
                 event: e,
                 progress: toStart ? 0 : model.progress(e, now: now),
                 warning: toStart ? false : model.isWarning(e, now: now),

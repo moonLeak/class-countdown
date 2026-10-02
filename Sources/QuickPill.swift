@@ -13,6 +13,8 @@ struct QuickPill: View {
     let onSettingsTap: () -> Void
 
     @State private var hovering = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    private var widthAnimation: Animation { reduceMotion ? .easeInOut(duration: 0.1) : DS.pillWidth }
 
     private var open: Bool { expanded || hovering }
     private var barWidth: CGFloat { CGFloat(4) * DS.pillHit + 8 }
@@ -40,8 +42,8 @@ struct QuickPill: View {
         .glassEffect(.regular, in: Capsule())
         .shadow(color: .black.opacity(0.25), radius: 7, y: 4)
         .contentShape(Capsule())
-        .onHover { h in withAnimation(DS.pillWidth) { hovering = h } }
-        .animation(DS.pillWidth, value: open)
+        .onHover { h in withAnimation(widthAnimation) { hovering = h } }
+        .animation(widthAnimation, value: open)
     }
 
     private func pillButton(_ symbol: String, _ label: String,

@@ -149,6 +149,7 @@ private struct FocusTab: View {
 
             Section {
                 Toggle(L("focus.keepAwake"), isOn: $settings.keepAwake)
+                Toggle(L("focus.notify"), isOn: $settings.notifyOnEnd)
             }
 
             Section {

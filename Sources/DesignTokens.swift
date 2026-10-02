@@ -164,7 +164,7 @@ enum DS {
 
 /// 卡片材质：系统的 Liquid Glass。只面向 macOS 26 及以上。
 /// 注意 glassEffect 只在背景画材质，不裁剪内容，
-/// 所以调用方要自己先 clipShape，见 CountdownCard。
+/// 所以调用方要自己先 clipShape，见 EventCard。
 struct GlassCard: ViewModifier {
     var radius: CGFloat = DS.radius
 

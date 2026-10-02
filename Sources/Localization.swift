@@ -306,6 +306,23 @@ private let l10nTable: [String: [String: String]] = [
         "focus.calendar.new": [
             "zh-Hans": "新建“专注”日历", "zh-Hant": "新建「專注」日曆", "en": "New “Focus” calendar"],
 
+        "focus.notify": [
+            "zh-Hans": "结束时通知并提示音", "zh-Hant": "結束時通知並提示音",
+            "en": "Notify with a sound when a session ends"],
+
+        "notify.focusEnd.title": [
+            "zh-Hans": "专注结束", "zh-Hant": "專注結束", "en": "Focus complete"],
+        "notify.focusEnd.body": [
+            "zh-Hans": "起来休息一下吧。", "zh-Hant": "起來休息一下吧。", "en": "Time for a break."],
+        "notify.focusEnd.long": [
+            "zh-Hans": "做满一轮了，好好休息一阵。", "zh-Hant": "做滿一輪了，好好休息一陣。",
+            "en": "Round complete. Take a longer break."],
+        "notify.breakEnd.title": [
+            "zh-Hans": "休息结束", "zh-Hant": "休息結束", "en": "Break over"],
+        "notify.breakEnd.body": [
+            "zh-Hans": "准备好开始下一轮了吗？", "zh-Hant": "準備好開始下一輪了嗎？",
+            "en": "Ready for the next session?"],
+
         "sec.menubar": [
             "zh-Hans": "菜单栏", "zh-Hant": "選單列", "en": "Menu Bar", "ja": "メニューバー",
             "ko": "메뉴 막대", "de": "Menüleiste", "fr": "Barre des menus",

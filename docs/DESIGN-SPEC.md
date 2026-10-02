@@ -32,7 +32,7 @@
 | `DS.padX` | 22 | 卡片左右内边距，文字对齐线 |
 | `DS.padY` | 18 | 卡片上内边距，标题行 |
 | `DS.gap` | 10 | 展开后卡片间距 |
-| `DS.peek` | 21（代码现为 27） | 收起时后卡露出的高度 |
+| `DS.peek` | 21 | 收起时后卡露出的高度 |
 | `DS.shrink` | 0.04 | 收起时每深一层缩小的比例 |
 | `DS.insetConcentric` | 12 | 按钮距卡片右、下边的距离 = 28 − 16 |
 | `DS.rowCenter` | 28 | 底行中心线距卡片底边，按钮、四个点、图标共用 |
@@ -268,17 +268,17 @@ Flow 状态与代码保持一致：`idle`、`focusing`、`focusPaused`、`breakW
 
 | 设计名 | Swift 类型 / 文件 | 现状 |
 |---|---|---|
-| `EventCard` | `CountdownCard` 改名 `EventCard`（`EventCard.swift`） | 待改名 |
-| `FlowCard` | `FlowCard.swift` | 新增 |
+| `EventCard` | `EventCard.swift`，原名 `CountdownCard` | 已改名 |
+| `FlowCard` | `FlowCard.swift` | 已实现 |
 | `CardStack` | `CardStack.swift` | 已有 |
-| `QuickPill` | `QuickPill.swift` | 新增 |
-| `SettingsWindow` | `SettingsWindowController.swift` | 现为临时面板，改为标准窗口 |
-| `StatsWindow` | `StatsWindowController.swift` | 新增 |
+| `QuickPill` | `QuickPill.swift` | 已实现 |
+| `SettingsWindow` | `SettingsWindowController.swift` | 已改为标准窗口 |
+| `StatsWindow` | `StatsWindowController.swift` | 已实现 |
 | `RingIcon` | `RingIcon.swift` | 已有 |
-| `BadgeIcon` | `BadgeIcon.swift` | 新增 |
+| `BadgeIcon` | `BadgeIcon.swift` | 已实现 |
 | `GlassButton`、`IconButton` | `GlassButton.swift` 等（保持 Sources 下平铺，见交接文档） | 新增 |
-| `FocusEngine` | `FocusEngine.swift` | 新增，纯逻辑，可单测 |
-| `FocusStore` | `FocusStore.swift` | 新增，本地记录 |
+| `FocusEngine` | `FocusEngine.swift` | 已实现，纯逻辑，有单测 |
+| `FocusStore` | `FocusStore.swift` | 已实现，JSON 文件 |
 
 ### 5.3 令牌、事件、文案 key
 
@@ -365,3 +365,16 @@ Flow 状态与代码保持一致：`idle`、`focusing`、`focusPaused`、`breakW
 | `Stats-v78` | 统计窗口，只统计时间，可操作 |
 | `MenuBar-v78` | 圆环与徽标两种样式，可切换状态与显示内容 |
 | `Settings-v78` | 设置窗口，可缩放，四个标签，控件可操作 |
+
+## 9. 实现与规范的出入（v1.2.0）
+
+| 项 | 规范 | 实现 | 原因 |
+|---|---|---|---|
+| 设置窗口材质 | `DS.Glass.window` 半透明 | 系统标准的不透明窗口背景 | 透明窗口在缩放时标题栏与工具栏重绘不全 |
+| 卡片拖动排序 | 任意卡片可拖 | 只有 Flow 卡可拖，位置记在 `cards.flowSlot` | 日程卡的顺序由结束时间决定，手动排没有意义 |
+| 浮窗最左图标 | 待定 | 保留，含义为定位 Flow 卡：展开整叠并让它的边框亮一下 | 默认决定 1 |
+| 菜单栏徽标“仅图标” | 三种显示内容 | 只有“名称与剩余时间”“仅剩余时间”两种 | 徽标里没有文字时是一个空色块，没有意义 |
+| 意外退出补记 | 不做心跳 | 只在状态变化、睡眠和退出时存快照 | 与规范一致。强杀或断电时可能少记最后一段 |
+| 统计的日视图 | 按小时分柱 | 专注块按开始时间归入小时与日，跨整点或跨午夜的块不拆分 | 默认决定 7 |
+| “同时记录休息” | 设置项，默认关 | 未实现 | 休息不计入统计，也没有需求 |
+| 菜单栏圆环颜色 | 状态色 | 模板图像，跟随菜单栏明暗 | 圆环是模板图像，不带色 |

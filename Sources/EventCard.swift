@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// 单张日程卡。340×160，内部只有信息，一个控件都没有。
-struct CountdownCard: View {
+struct EventCard: View {
 
     let event: ScheduleModel.EventSnapshot
     let progress: Double

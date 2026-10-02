@@ -95,37 +95,54 @@ reads from there.
 The same goes for iCloud, a school Exchange calendar, or any subscribed
 `.ics` timetable. If it shows up in the system Calendar app, it works here.
 
+### Focus and statistics
+
+The bottom card of the stack is the **focus card**, a Pomodoro-style timer:
+25 minutes of focus, a 5 minute break and a 15 minute long break by default,
+with a long break after every 4 sessions. Four dots show your progress through
+the round, and the button at the bottom right follows the state (Start, Pause,
+Resume, Skip). You can't pause a break.
+
+- Timing keeps running while the lid is closed or the Mac sleeps. If the lid
+  stays closed for more than 15 minutes, that session ends at the moment you closed it
+- If the app dies unexpectedly, the next launch records what it can, conservatively
+- The chart icon on the card or in the pill opens the **statistics window**:
+  day, week, month and year bar charts, total or daily average, compared with
+  the previous period, with paging
+- Only focus time is counted. Breaks aren't, and there are no counts or categories
+- Records live in `~/Library/Application Support/com.carson.classcountdown/focus.json`
+
 ### Settings
 
-Right-click anywhere on the card and choose **Settings…**:
+Right-click the menu bar item or a card and choose **Settings…** (or press
+Command-comma). It is a regular window with four tabs:
 
-- **Language** — the app's own interface, in 11 languages. Event titles always
-  stay in whatever the calendar says. Takes effect immediately, no relaunch
-- **Calendars** — which calendars count toward the countdown (e.g. keep your
-  class schedule, drop birthdays and holidays)
-- **All-day events** — off by default, otherwise "Birthday" would occupy a
-  whole day
-- **Menu bar** — name and time left, or time only, and the separator between
-  them (presets or your own, with a live preview)
-- **Ending soon alert** — how much time left before the bar turns orange,
-  5 minutes by default
-- **Open at login**
+- **General**: language (11, applied immediately), open at login; menu bar style
+  (ring or badge), what to show, the separator, and whether to show the next event when idle
+- **Calendars**: which calendars count; all-day events (off by default); the
+  ending-soon alert (5 minutes by default)
+- **Focus**: the three durations, two auto-start switches, keep the screen awake
+  while focusing, a notification when a session ends, and *Add focus sessions to
+  Calendar* with its target calendar
+- **About**: version and quit
 
 ### Gestures
 
 | Gesture | What happens |
 | --- | --- |
 | Click the menu bar item | The stack flies out of the icon; click again to send it back |
+| Right-click the menu bar item | Open Calendar, Settings, About, Quit |
 | Click a card | Expand the stack, click again to collapse |
-| Right-click a card | Open Calendar, Settings, About, Quit |
+| Drag the focus card (when expanded) | Move it within the stack; the position is remembered |
+| Hover the small circle at a card's top right | It opens into an icon bar: focus, statistics, calendar, settings |
 | Force click a card (trackpad) | The card sinks, Calendar opens, the panel retracts |
 
 ---
 
 ## What it deliberately doesn't do
 
-- No notifications, no alarms, no interruptions
-- No history, no time tracking, no stats
+- The countdown itself never notifies or rings; only the end of a focus session or a break sends one notification (optional)
+- Records focus only: no categories, no counts
 - Never edits or deletes an event you already have (with *Add focus sessions to Calendar* on, it only adds its own focus events)
 - No network access at all
 
@@ -136,7 +153,7 @@ Right-click anywhere on the card and choose **Settings…**:
 | File | Responsibility |
 | --- | --- |
 | `Sources/App.swift` | Entry point and app delegate |
-| `Sources/PanelController.swift` | Status item, the transparent panel, show/hide animation, settings window |
+| `Sources/PanelController.swift` | Status item, the transparent panel, show/hide animation |
 | `Sources/DesignTokens.swift` | Every number the design settled on, plus the glass material |
 | `Sources/CalendarService.swift` | EventKit wrapper: access, 48-hour window, change notifications |
 | `Sources/ScheduleModel.swift` | State machine: which events are running, seconds left, progress |
@@ -144,9 +161,24 @@ Right-click anywhere on the card and choose **Settings…**:
 | `Sources/Interaction.swift` | Click and force click on one card, in a single NSView |
 | `Sources/Localization.swift` | Runtime string table, 11 languages, switches without a relaunch |
 | `Sources/AppState.swift` | Shared holder for the services |
-| `Sources/CountdownCard.swift` | One 340×160 card. Information only, no controls |
+| `Sources/EventCard.swift` | One 340×160 card. Information only, no controls |
 | `Sources/TickEngine.swift` | One-second heartbeat, drives display refresh only |
-| `Sources/SettingsView.swift` | Settings panel |
+| `Sources/SettingsWindowController.swift` | The settings window: regular window, toolbar tabs, remembers position and size |
+| `Sources/SettingsView.swift` | Contents of each settings tab |
+| `Sources/AppWindowTracker.swift` | Switches to the regular activation policy while settings or statistics are open |
+| `Sources/FlowCard.swift` | The focus card |
+| `Sources/QuickPill.swift` | The pill at a card's top right |
+| `Sources/GlassButton.swift` | Capsule button, icon button, the four dots |
+| `Sources/FocusEngine.swift` | Focus state machine, pure logic, time injected by the caller |
+| `Sources/FocusStore.swift` | JSON storage of focus records and crash recovery |
+| `Sources/FocusController.swift` | Connects the engine to the tick, sleep and wake, storage, screen awake, notifications and Calendar |
+| `Sources/FocusCalendarWriter.swift` | Writes focus sessions into Calendar, marked |
+| `Sources/FocusCalendarMarker.swift` | The marker on those events, used to filter and de-duplicate |
+| `Sources/FocusNotifier.swift` | End-of-session notifications |
+| `Sources/ScreenAwake.swift` | Keep the screen awake while focusing |
+| `Sources/StatsAggregator.swift` | Statistics aggregation, pure functions |
+| `Sources/StatsView.swift`, `StatsWindowController.swift` | The statistics window |
+| `Sources/BadgeIcon.swift`, `RingIcon.swift` | Menu bar badge and ring |
 | `Sources/SettingsStore.swift` | Persisted user preferences |
 | `Sources/LaunchAtLogin.swift` | Open-at-login toggle |
 | `Sources/SystemBridges.swift` | Wake-from-sleep and time-zone change notifications |
@@ -154,6 +186,8 @@ Right-click anywhere on the card and choose **Settings…**:
 | `build.sh` | Compile and assemble the .app |
 | `package.sh` | Package into a .dmg |
 | `uninstall.sh` | Remove the app, its preferences and the login item |
+| `test.sh` | Unit tests for the state machine, storage and statistics (`Tests/main.swift`, no full app needed) |
+| `dev.sh` | Development: build and launch with the mock events in `DevData/mock-events.json`, without reading the system calendar |
 
 ### A few design decisions
 

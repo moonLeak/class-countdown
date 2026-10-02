@@ -17,6 +17,7 @@ final class FocusController: ObservableObject {
     private let store = FocusController.makeStore()
     private let awake = ScreenAwake()
     private let calendarWriter = FocusCalendarWriter()
+    private let notifier = FocusNotifier()
     private var bag = Set<AnyCancellable>()
 
     init(settings: SettingsStore, tick: TickEngine) {
@@ -31,7 +32,7 @@ final class FocusController: ObservableObject {
 
         tick.$now
             .sink { [weak self] now in
-                Task { @MainActor in self?.apply { $0.tick(now: now) } }
+                Task { @MainActor in self?.apply({ $0.tick(now: now) }, natural: true) }
             }
             .store(in: &bag)
 
@@ -49,7 +50,7 @@ final class FocusController: ObservableObject {
             }
         }
         NSWorkspaceNotificationBridge.onWake { [weak self] in
-            Task { @MainActor in self?.apply { $0.didWake(now: Date()) } }
+            Task { @MainActor in self?.apply({ $0.didWake(now: Date()) }, natural: true) }
         }
     }
 
@@ -119,7 +120,8 @@ final class FocusController: ObservableObject {
     }
 
     /// 所有状态变化都走这里：取走结束的专注块、更新常亮与快照
-    private func apply(_ change: (inout FocusEngine) -> Void) {
+    /// natural 表示是时间走到了而不是用户点的，只有这种情况才发通知
+    private func apply(_ change: (inout FocusEngine) -> Void, natural: Bool = false) {
         let before = engine.state
         var next = engine
         change(&next)
@@ -132,8 +134,20 @@ final class FocusController: ObservableObject {
 
         finished.forEach { store.append($0); writeToCalendar($0) }
         if next.isBreak, !Self.isBreak(before) { breakTitleIndex += 1 }
+        if natural, settings.notifyOnEnd { notifyIfEnded(before: before, after: next.state, finished: finished) }
         awake.set(settings.keepAwake && next.state == .focusing)
         saveSnapshot(now: Date())
+    }
+
+    private func notifyIfEnded(before: FocusState, after: FocusState, finished: [FocusBlock]) {
+        if before == .focusing, finished.contains(where: { $0.isComplete }) {
+            let long = after == .longBreakWaiting || after == .longBreaking
+            notifier.notify(title: L("notify.focusEnd.title"),
+                            body: L(long ? "notify.focusEnd.long" : "notify.focusEnd.body"))
+        } else if (before == .breaking || before == .longBreaking),
+                  after == .idle || after == .focusing {
+            notifier.notify(title: L("notify.breakEnd.title"), body: L("notify.breakEnd.body"))
+        }
     }
 
     private func writeToCalendar(_ block: FocusBlock) {
