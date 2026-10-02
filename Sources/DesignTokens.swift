@@ -13,8 +13,9 @@ enum DS {
     static let padY: CGFloat = 18
 
     // MARK: 堆叠
-    /// 每张后卡露出的高度 = padY + 名称行高 + 余量，刚好读完名称
-    static let peek: CGFloat = 40
+    /// 每张后卡露出的高度。文字在这一条里垂直居中，不再贴着卡片底边。
+    /// 原值 40，按要求收到 2/3。
+    static let peek: CGFloat = 27
     /// 展开后的卡间距
     static let gap: CGFloat = 10
     /// 每往后一层缩小的比例

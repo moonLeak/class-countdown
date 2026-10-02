@@ -78,6 +78,9 @@ final class PanelController: NSObject {
         guard let button = statusItem.button else { return }
         button.target = self
         button.action = #selector(togglePanel)
+        // 右键也要触发 action，才能在 togglePanel 里分辨并弹菜单
+        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        button.imagePosition = .imageLeading
         // 悬停能看到这一份是什么时候编译的，用来确认跑的是哪次产物
         button.toolTip = "ClassCountdown  build \(Self.buildStamp)"
         button.font = .monospacedDigitSystemFont(ofSize: 13, weight: .regular)
@@ -101,14 +104,14 @@ final class PanelController: NSObject {
                                    accessibilityDescription: L("a11y.noEvents"))
         case .running(let list):
             guard let e = list.first else { return }
-            button.image = nil
+            button.image = RingIcon.image(progress: model.progress(e, now: now))
             button.title = TimeFormat.menuBar(
                 title: e.title,
                 time: TimeFormat.countdown(model.remaining(e, now: now)),
                 showTitle: state.settings.showsTitleInMenuBar,
                 separator: state.settings.separator)
         case .upcoming(let e):
-            button.image = nil
+            button.image = RingIcon.image(progress: 0)
             button.title = TimeFormat.menuBar(
                 title: e.title,
                 time: "↑" + TimeFormat.countdown(model.remaining(e, now: now, counting: true)),
@@ -179,8 +182,41 @@ final class PanelController: NSObject {
     }
 
     @objc private func togglePanel() {
+        if NSApp.currentEvent?.type == .rightMouseUp {
+            if isOpen { hide() }
+            showContextMenu()
+            return
+        }
         isOpen ? hide() : show()
     }
+
+    /// 右键菜单栏图标：与卡片上的右键菜单同一组条目
+    private func showContextMenu() {
+        guard let button = statusItem.button else { return }
+        let menu = NSMenu()
+        func add(_ key: String, _ action: Selector) {
+            let item = NSMenuItem(title: L(key), action: action, keyEquivalent: "")
+            item.target = self
+            menu.addItem(item)
+        }
+        add("menu.openCalendar", #selector(menuOpenCalendar))
+        menu.addItem(.separator())
+        add("menu.settings", #selector(menuOpenSettings))
+        add("menu.about", #selector(menuAbout))
+        menu.addItem(.separator())
+        add("menu.quit", #selector(menuQuit))
+        // 弹在按钮正下方
+        menu.popUp(positioning: nil,
+                   at: NSPoint(x: 0, y: button.bounds.height + 4), in: button)
+    }
+
+    @objc private func menuOpenCalendar() { NSWorkspaceBridge.openCalendarApp() }
+    @objc private func menuOpenSettings() { openSettings() }
+    @objc private func menuAbout() {
+        NSApp.activate(ignoringOtherApps: true)
+        NSApp.orderFrontStandardAboutPanel(nil)
+    }
+    @objc private func menuQuit() { NSWorkspaceBridge.quit() }
 
     private func show() {
         guard let button = statusItem.button, let buttonWindow = button.window else { return }

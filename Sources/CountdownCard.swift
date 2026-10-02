@@ -14,6 +14,10 @@ struct CountdownCard: View {
     /// 布尔会让 SwiftUI 直接增删视图，那就是一跳一跳的来源。
     let fullness: Double
 
+    /// 这张卡收起时被 scaleEffect 缩成的比例（1 - shrink * 层号）。
+    /// 露出的那一条在缩放后高度恰好是 peek，换算回卡片自身坐标要除以它，
+    /// 文字才能在肉眼看到的那一条里居中。
+    var collapsedScale: CGFloat = 1
 
     var body: some View {
         progressLayer
@@ -23,6 +27,13 @@ struct CountdownCard: View {
             // 先裁剪再上玻璃：glassEffect 只画背景，不管内容越界
             .clipShape(DS.cardShape)
             .glassCard()
+            // 收起态的名称与百分比：放在 padding 之外的底部条里，条高 = 露出高度，垂直居中
+            .overlay(alignment: .bottom) {
+                titleRow(showsPercent: true)
+                    .padding(.horizontal, DS.padX)
+                    .frame(width: DS.cardW, height: DS.peek / collapsedScale, alignment: .center)
+                    .opacity(1 - fullness)
+            }
             .accessibilityElement(children: .combine)
             .accessibilityLabel(Text("\(event.title)，\(countdown)"))
     }
@@ -73,10 +84,6 @@ struct CountdownCard: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .opacity(fullness)
 
-            titleRow(showsPercent: true)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-                .opacity(1 - fullness)
-
             // 倒计时垂直居中于卡片，所以它的中心就是卡片的中心
             VStack(alignment: .leading, spacing: 2) {
                 if let subtitle {
@@ -113,7 +120,7 @@ struct CountdownCard: View {
     }
 
     private func titleRow(showsPercent: Bool) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 10) {
+        HStack(alignment: .center, spacing: 10) {
             Text(event.title)
                 .font(.system(size: DS.fBody, weight: DS.wBody))
                 .foregroundStyle(DS.l2)

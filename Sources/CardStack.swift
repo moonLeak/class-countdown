@@ -142,7 +142,8 @@ struct CardStack: View {
                     progress: model.progress(e, now: now),
                     warning: model.isWarning(e, now: now),
                     countdown: TimeFormat.countdown(model.remaining(e, now: now)),
-                    fullness: full
+                    fullness: full,
+                    collapsedScale: 1 - DS.shrink * CGFloat(i)
                 )
                 .overlay { interaction(i) }
                 // 重按的缩放挂在这一层，和堆叠本身的缩放各管各的
