@@ -43,6 +43,8 @@ struct CardStack: View {
     @State private var pressedIndex: Int? = nil
     /// 正在被拖动的 Flow 卡：起始位置与垂直位移
     @State private var drag: (startIndex: Int, dy: CGFloat)? = nil
+    /// 浮窗定位图标点过之后，Flow 卡边框亮一下
+    @State private var flowHighlight = false
 
     private var expanded: Bool { presentation.expanded }
 
@@ -93,7 +95,7 @@ struct CardStack: View {
         // 不能用 GlassEffectContainer：同一个容器里的玻璃共享背景采样，
         // 于是它们互相不模糊，后面卡片的内容会直接透到最前面来。
         // 每张卡各自独立取景，前面那张才会把后面那张糊掉。
-        deck(items)
+        stackWithPill(items)
             // 四周留给玻璃投影扩散的余量。
             // 投影 radius 14 加 y 偏移 10，四周至少要 24 才不会被切；
             // 留 14 的话左右正好卡在边界上，看着就是一条硬边。
@@ -181,6 +183,45 @@ struct CardStack: View {
         )
     }
 
+    // MARK: 浮窗与整叠
+
+    /// 浮窗压在最上层（z 200）。整叠展开时下移 46 给它让位，
+    /// 浮窗同时移到整叠右上角，两个动作同一条曲线。
+    private func stackWithPill(_ list: [StackItem]) -> some View {
+        ZStack(alignment: .topTrailing) {
+            deck(list)
+                .offset(y: expanded ? DS.stackShift : 0)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+
+            QuickPill(
+                expanded: expanded,
+                onFocusTap: { locateFlow() },
+                onStatsTap: {
+                    NotificationCenter.default.post(name: .openStatsRequested, object: nil)
+                },
+                onCalendarTap: { openCalendar() },
+                onSettingsTap: {
+                    NotificationCenter.default.post(name: .openSettingsRequested, object: nil)
+                }
+            )
+            .padding(.top, expanded ? 0 : DS.pillInsetTop)
+            .padding(.trailing, expanded ? 0 : DS.pillInsetRight)
+            .zIndex(200)
+        }
+        .frame(width: DS.cardW,
+               height: stackHeight(expanded: true, count: list.count) + DS.stackShift,
+               alignment: .top)
+    }
+
+    /// 整叠展开并让 Flow 卡亮一下，帮用户找到它
+    private func locateFlow() {
+        withAnimation(DS.motion) { presentation.expanded = true }
+        withAnimation(DS.fade) { flowHighlight = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
+            withAnimation(DS.fade) { flowHighlight = false }
+        }
+    }
+
     // MARK: 一叠
 
     private func deck(_ list: [StackItem]) -> some View {
@@ -243,7 +284,8 @@ struct CardStack: View {
                 interaction: AnyView(interaction(i, count: n, draggable: true)),
                 onStatsTap: {
                     NotificationCenter.default.post(name: .openStatsRequested, object: nil)
-                })
+                },
+                highlight: flowHighlight)
         }
     }
 
@@ -255,7 +297,7 @@ struct CardStack: View {
 
     /// 窗口高度：恒取展开后的最大值，加上四周那圈留白
     private func panelHeight() -> CGFloat {
-        stackHeight(expanded: true, count: baseItems.count) + DS.panelInset * 2
+        stackHeight(expanded: true, count: baseItems.count) + DS.stackShift + DS.panelInset * 2
     }
 }
 

@@ -262,6 +262,9 @@ private let l10nTable: [String: [String: String]] = [
             "zh-Hans": "专注时保持屏幕常亮", "zh-Hant": "專注時保持螢幕常亮",
             "en": "Keep the screen awake while focusing"],
 
+        "pill.focus": [
+            "zh-Hans": "定位专注卡", "zh-Hant": "定位專注卡", "en": "Show focus card"],
+
         "sec.menubar": [
             "zh-Hans": "菜单栏", "zh-Hant": "選單列", "en": "Menu Bar", "ja": "メニューバー",
             "ko": "메뉴 막대", "de": "Menüleiste", "fr": "Barre des menus",

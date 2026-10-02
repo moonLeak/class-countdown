@@ -29,6 +29,19 @@ enum DS {
     /// 内容区最大宽，窗口更宽时居中
     static let settingsContentMaxW: CGFloat = 560
 
+    // MARK: 浮窗 QuickPill
+    static let pillH: CGFloat = 34
+    static let pillGap: CGFloat = 12
+    /// 展开后整叠下移量 = pillH + pillGap
+    static let stackShift: CGFloat = pillH + pillGap
+    static let pillHit: CGFloat = 30
+    static let pillIcon: CGFloat = 15
+    static let pillChevron: CGFloat = 17
+    /// 收起态的位置：卡顶向下 14，距卡右边 18
+    static let pillInsetTop: CGFloat = 14
+    static let pillInsetRight: CGFloat = 18
+    static let pillWidth: Animation = .timingCurve(0.32, 0.72, 0, 1, duration: 0.3)
+
     // MARK: 统计窗口
     static let statsW: CGFloat = 560
     static let statsH: CGFloat = 660

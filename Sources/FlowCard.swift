@@ -12,6 +12,8 @@ struct FlowCard: View {
     /// 盖在内容上、控件下面的交互区，由卡片叠传入
     let interaction: AnyView
     let onStatsTap: () -> Void
+    /// 浮窗的定位图标点过之后闪一下
+    var highlight = false
 
     private var engine: FocusEngine { focus.engine }
     private var title: String { engine.isBreak ? L(focus.breakTitleKey) : L("flow.title.focus") }
@@ -32,6 +34,12 @@ struct FlowCard: View {
             }
             .overlay { interaction }
             .overlay { controls }
+            .overlay {
+                DS.cardShape
+                    .stroke(DS.Color.focus, lineWidth: 2)
+                    .opacity(highlight ? 1 : 0)
+                    .allowsHitTesting(false)
+            }
             .accessibilityElement(children: .contain)
     }
 
