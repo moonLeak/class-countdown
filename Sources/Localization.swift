@@ -247,6 +247,9 @@ private let l10nTable: [String: [String: String]] = [
         "focus.longBreak": [
             "zh-Hans": "长休息", "zh-Hant": "長休息", "en": "Long break"],
 
+        "unit.min": [
+            "zh-Hans": "分钟", "zh-Hant": "分鐘", "en": "min"],
+
         "unit.minutes": [
             "zh-Hans": "%d 分钟", "zh-Hant": "%d 分鐘", "en": "%d min"],
 

@@ -20,8 +20,6 @@ final class FocusCalendarWriter {
     @discardableResult
     func write(_ block: FocusBlock, title: String, calendarID: String,
                newCalendarTitle: String) -> (result: Result, calendarID: String) {
-        // 模拟模式下不碰真实日历
-        guard CalendarService.mockPath == nil else { return (.skipped("mock"), calendarID) }
         guard EKEventStore.authorizationStatus(for: .event) == .fullAccess else {
             return (.skipped("no full access"), calendarID)
         }

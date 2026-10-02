@@ -99,6 +99,12 @@ enum DS {
     static let badgeBaseAlphaLight: Double = 0.55
     static let badgeFillAlpha: Double = 0.90
 
+    // MARK: 拖动排序
+    /// 拿起的卡：放大 1.02，阴影 55% 的浓度，层级 60
+    static let dragScale: CGFloat = 1.02
+    static let dragShadow: Double = 0.35
+    static let dragZ: Double = 60
+
     // MARK: 字号与字重（三级，一一对应）
     static let fDisplay: CGFloat = 54
     static let wDisplay: Font.Weight = .medium      // 500

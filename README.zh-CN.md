@@ -117,7 +117,7 @@ xattr -dr com.apple.quarantine /Applications/TimeTool.app
 | 点菜单栏图标 | 卡片从图标里长出来，再点一次原路缩回去 |
 | 右键菜单栏图标 | 打开日历、设置、关于、退出 |
 | 单击卡片 | 展开整叠，再点一次收起 |
-| 拖动专注卡（展开后） | 换它在卡叠里的位置，重启后保持 |
+| 拖动任意卡片（展开后） | 换它在卡叠里的位置，重启后保持 |
 | 鼠标移到卡片右上角的小圆 | 展开成图标条：专注、统计、日历、设置 |
 | 二段重按卡片（触控板） | 卡片下沉，跳转日历，面板随后收回 |
 
@@ -171,7 +171,6 @@ xattr -dr com.apple.quarantine /Applications/TimeTool.app
 | `package.sh` | 打包成 .dmg |
 | `uninstall.sh` | 卸载应用、偏好设置与登录项 |
 | `test.sh` | 跑状态机、存储、统计聚合的单测（`Tests/main.swift`，不需要整个 App） |
-| `dev.sh` | 开发用：编译并用 `DevData/mock-events.json` 里的模拟日程启动，不读系统日历 |
 
 ### 几个设计决定
 

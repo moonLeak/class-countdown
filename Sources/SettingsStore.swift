@@ -131,7 +131,7 @@ final class SettingsStore: ObservableObject {
         static let autoStartBreak    = "focus.autoStartBreak"
         static let autoStartFocus    = "focus.autoStartFocus"
         static let keepAwake         = "focus.keepAwake"
-        static let flowCardSlot      = "cards.flowSlot"
+        static let cardOrder         = "cards.order"
         static let writeToCalendar   = "focus.writeToCalendar"
         static let focusCalendarID   = "focus.calendarID"
         static let notifyOnEnd       = "focus.notifyOnEnd"
@@ -210,10 +210,10 @@ final class SettingsStore: ObservableObject {
     @Published var keepAwake: Bool {
         didSet { defaults.set(keepAwake, forKey: Key.keepAwake) }
     }
-    /// Flow 卡在卡叠里的位置，-1 表示默认的最底层。
-    /// 日程卡的顺序由结束时间决定，不能手动排，所以只记 Flow 卡的位置。
-    @Published var flowCardSlot: Int {
-        didSet { defaults.set(flowCardSlot, forKey: Key.flowCardSlot) }
+    /// 卡叠里卡片的顺序，存卡片 id。拖动后整叠记下来，
+    /// 只留当时在场的卡，所以不会越存越多
+    @Published var cardOrder: [String] {
+        didSet { defaults.set(cardOrder, forKey: Key.cardOrder) }
     }
 
     /// 把完成的专注写入日历。需要完整日历访问权限
@@ -280,7 +280,6 @@ final class SettingsStore: ObservableObject {
             Key.autoStartBreak: false,
             Key.autoStartFocus: false,
             Key.keepAwake: true,
-            Key.flowCardSlot: -1,
             Key.writeToCalendar: false,
             Key.focusCalendarID: "",
             Key.notifyOnEnd: true,
@@ -307,7 +306,7 @@ final class SettingsStore: ObservableObject {
         self.autoStartBreak     = defaults.bool(forKey: Key.autoStartBreak)
         self.autoStartFocus     = defaults.bool(forKey: Key.autoStartFocus)
         self.keepAwake          = defaults.bool(forKey: Key.keepAwake)
-        self.flowCardSlot       = defaults.integer(forKey: Key.flowCardSlot)
+        self.cardOrder          = defaults.stringArray(forKey: Key.cardOrder) ?? []
         self.writeToCalendar    = defaults.bool(forKey: Key.writeToCalendar)
         self.focusCalendarID    = defaults.string(forKey: Key.focusCalendarID) ?? ""
         self.notifyOnEnd        = defaults.bool(forKey: Key.notifyOnEnd)

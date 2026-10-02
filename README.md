@@ -133,7 +133,7 @@ Command-comma). It is a regular window with four tabs:
 | Click the menu bar item | The stack flies out of the icon; click again to send it back |
 | Right-click the menu bar item | Open Calendar, Settings, About, Quit |
 | Click a card | Expand the stack, click again to collapse |
-| Drag the focus card (when expanded) | Move it within the stack; the position is remembered |
+| Drag any card (when expanded) | Move it within the stack; the order is remembered |
 | Hover the small circle at a card's top right | It opens into an icon bar: focus, statistics, calendar, settings |
 | Force click a card (trackpad) | The card sinks, Calendar opens, the panel retracts |
 
@@ -187,7 +187,6 @@ Command-comma). It is a regular window with four tabs:
 | `package.sh` | Package into a .dmg |
 | `uninstall.sh` | Remove the app, its preferences and the login item |
 | `test.sh` | Unit tests for the state machine, storage and statistics (`Tests/main.swift`, no full app needed) |
-| `dev.sh` | Development: build and launch with the mock events in `DevData/mock-events.json`, without reading the system calendar |
 
 ### A few design decisions
 

@@ -154,15 +154,9 @@ private struct FocusTab: View {
     var body: some View {
         Form {
             Section(L("focus.sec.durations")) {
-                Stepper(value: $settings.focusMinutes, in: 1...120) {
-                    LabeledContent(L("focus.focusMinutes"), value: L("unit.minutes", settings.focusMinutes))
-                }
-                Stepper(value: $settings.shortBreakMinutes, in: 1...60) {
-                    LabeledContent(L("focus.shortBreak"), value: L("unit.minutes", settings.shortBreakMinutes))
-                }
-                Stepper(value: $settings.longBreakMinutes, in: 1...60) {
-                    LabeledContent(L("focus.longBreak"), value: L("unit.minutes", settings.longBreakMinutes))
-                }
+                MinutesField(title: L("focus.focusMinutes"), value: $settings.focusMinutes, range: 1...180)
+                MinutesField(title: L("focus.shortBreak"), value: $settings.shortBreakMinutes, range: 1...60)
+                MinutesField(title: L("focus.longBreak"), value: $settings.longBreakMinutes, range: 1...120)
             }
 
             Section(L("focus.sec.auto")) {
@@ -234,6 +228,31 @@ private struct AboutTab: View {
         }
         .formStyle(.grouped)
         .scrollContentBackground(.hidden)
+    }
+}
+
+/// 分钟数输入框。回车或离开输入框时生效，超出范围的值夹回到范围内
+private struct MinutesField: View {
+    let title: String
+    @Binding var value: Int
+    let range: ClosedRange<Int>
+
+    var body: some View {
+        LabeledContent(title) {
+            HStack(spacing: 6) {
+                TextField("", value: Binding(
+                    get: { value },
+                    set: { value = min(max($0, range.lowerBound), range.upperBound) }
+                ), format: .number)
+                .textFieldStyle(.roundedBorder)
+                .multilineTextAlignment(.trailing)
+                .monospacedDigit()
+                .frame(width: 60)
+                .labelsHidden()
+                Text(L("unit.min"))
+                    .foregroundStyle(.secondary)
+            }
+        }
     }
 }
 

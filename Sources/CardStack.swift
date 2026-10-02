@@ -45,8 +45,8 @@ struct CardStack: View {
 
     /// 二段重按的下沉反馈，只作用在被按的那一张上
     @State private var pressedIndex: Int? = nil
-    /// 正在被拖动的 Flow 卡：起始位置与垂直位移
-    @State private var drag: (startIndex: Int, dy: CGFloat)? = nil
+    /// 正在被拖动的卡：它的 id、按下时所在的位置、垂直位移
+    @State private var drag: (id: String, startIndex: Int, dy: CGFloat)? = nil
     /// 浮窗定位图标点过之后，Flow 卡边框亮一下
     @State private var flowHighlight = false
 
@@ -69,26 +69,32 @@ struct CardStack: View {
         return list
     }
 
-    /// 把 Flow 卡挪到指定位置。slot 为负或不小于末位时就是默认的最底层。
-    private func placing(flowAt slot: Int, in list: [StackItem]) -> [StackItem] {
-        guard slot >= 0, slot < list.count - 1,
-              let from = list.firstIndex(where: { $0.isFlow }) else { return list }
-        var out = list
+    /// 按记住的顺序排。记得的卡按记住的先后；
+    /// 新出现的日程排在最前（它往往正是刚开始的那件事），新出现的 Flow 卡排在最后
+    private func ordered(_ base: [StackItem]) -> [StackItem] {
+        let saved = settings.cardOrder
+        let rank = Dictionary(saved.enumerated().map { ($1, $0) }, uniquingKeysWith: { a, _ in a })
+        let known = base.filter { rank[$0.id] != nil }.sorted { rank[$0.id]! < rank[$1.id]! }
+        let fresh = base.filter { rank[$0.id] == nil }
+        return fresh.filter { !$0.isFlow } + known + fresh.filter { $0.isFlow }
+    }
+
+    /// 当前该显示的顺序。拖动中，被拖的卡按位移插到它该去的位置，其他卡顺次让位
+    private var items: [StackItem] {
+        guard let d = drag else { return ordered(baseItems) }
+        return arranged(moving: d.id, from: d.startIndex, by: d.dy)
+    }
+
+    private func arranged(moving id: String, from start: Int, by dy: CGFloat) -> [StackItem] {
+        var out = ordered(baseItems)
+        guard let from = out.firstIndex(where: { $0.id == id }) else { return out }
+        let to = liveSlot(startIndex: start, dy: dy, count: out.count)
         let item = out.remove(at: from)
-        out.insert(item, at: slot)
+        out.insert(item, at: to)
         return out
     }
 
-    private var items: [StackItem] {
-        let base = baseItems
-        if let d = drag {
-            let slot = liveSlot(startIndex: d.startIndex, dy: d.dy, count: base.count)
-            return placing(flowAt: slot, in: base)
-        }
-        return placing(flowAt: settings.flowCardSlot, in: base)
-    }
-
-    /// 拖动中按位移算出 Flow 卡现在该在第几位
+    /// 拖动中按位移算出被拖的卡现在该在第几位
     private func liveSlot(startIndex: Int, dy: CGFloat, count: Int) -> Int {
         let step = DS.cardH + DS.gap
         let raw = (CGFloat(startIndex) + dy / step).rounded()
@@ -156,8 +162,8 @@ struct CardStack: View {
     }
 
     /// 每张卡各有一块交互区，重按的反馈才落在手指按住的那一张上。
-    /// draggable 只给 Flow 卡，且只在展开后才响应拖动。
-    private func interaction(_ index: Int, count: Int, draggable: Bool = false) -> some View {
+    /// 展开后每张卡都能拖动换位置，松手后整叠顺序记下来。
+    private func interaction(_ index: Int, count: Int, id: String) -> some View {
         InteractionArea(
             onClick: {
                 withAnimation(motion) { presentation.expanded.toggle() }
@@ -174,15 +180,18 @@ struct CardStack: View {
             onPressing: { down in
                 withAnimation(DS.press) { pressedIndex = down ? index : nil }
             },
-            onDrag: (draggable && expanded) ? { dy, finished in
+            onDrag: expanded ? { dy, finished in
+                // 起点只在第一下记，之后 index 会随着让位变化
+                let start = (drag?.id == id) ? drag!.startIndex : index
                 if finished {
-                    let slot = liveSlot(startIndex: drag?.startIndex ?? index, dy: dy, count: count)
+                    let order = arranged(moving: id, from: start, by: dy).map(\.id)
+                    // 松手：被拖的卡从指尖位置滑进空位，同一条曲线
                     withAnimation(motion) {
-                        settings.flowCardSlot = slot >= count - 1 ? -1 : slot
+                        settings.cardOrder = order
                         drag = nil
                     }
                 } else {
-                    drag = (drag?.startIndex ?? index, dy)
+                    drag = (id, start, dy)
                 }
             } : nil
         )
@@ -237,17 +246,23 @@ struct CardStack: View {
                 let i = pair.offset
                 let item = pair.element
                 let full: Double = (expanded || i == 0) ? 1 : 0
-                let dragging = item.isFlow && drag != nil
+                let dragging = drag?.id == item.id
                 card(item, index: i, count: n, fullness: full)
+                    // 拿起来的卡放大一点、阴影加深，看得出它浮在上面
+                    .shadow(color: .black.opacity(dragging ? DS.dragShadow : 0),
+                            radius: dragging ? 18 : 0, y: dragging ? 10 : 0)
                     // 重按的缩放挂在这一层，和堆叠本身的缩放各管各的
-                    .scaleEffect(pressedIndex == i ? DS.pressScale : (dragging ? 1.02 : 1))
+                    .scaleEffect(pressedIndex == i ? DS.pressScale : (dragging ? DS.dragScale : 1))
+                    .animation(DS.press, value: dragging)
                     // 主卡压在最上面完整显示，后面的往下露出底边
                     .offset(y: yOffset(index: i, dragging: dragging))
+                    // 让位的卡顺滑地挪过去；被拖的那张直接跟手，不加动画
+                    .animation(dragging ? nil : motion, value: list.map(\.id))
                     // 锚点必须恒定。展开时 scale 回到 1，anchor 本来就不起作用，
                     // 可一旦让它在 .bottom 和 .center 之间切换，SwiftUI 会把锚点也插值，
                     // 最顶上那张明明 offset 和 scale 都没变，却跟着挪了一下。
                     .scaleEffect(expanded ? 1 : 1 - DS.shrink * CGFloat(i), anchor: .bottom)
-                    .zIndex(dragging ? 60 : Double(n - i))
+                    .zIndex(dragging ? DS.dragZ : Double(n - i))
             }
         }
         // 高度恒定取展开后的最大值，收起时下方是透明留白。
@@ -275,18 +290,18 @@ struct CardStack: View {
                 fullness: fullness,
                 collapsedScale: 1 - DS.shrink * CGFloat(i)
             )
-            .overlay { interaction(i, count: n) }
+            .overlay { interaction(i, count: n, id: item.id) }
         case .access:
             AccessPanel(calendarService: calendarService)
-                .overlay { interaction(i, count: n) }
+                .overlay { interaction(i, count: n, id: item.id) }
         case .empty:
             MessagePanel(head: L("panel.emptyHead"), message: L("panel.emptyBody"))
-                .overlay { interaction(i, count: n) }
+                .overlay { interaction(i, count: n, id: item.id) }
         case .flow:
             FlowCard(
                 focus: focus, now: now, fullness: fullness,
                 collapsedScale: 1 - DS.shrink * CGFloat(i),
-                interaction: AnyView(interaction(i, count: n, draggable: true)),
+                interaction: AnyView(interaction(i, count: n, id: item.id)),
                 onStatsTap: {
                     NotificationCenter.default.post(name: .openStatsRequested, object: nil)
                 },

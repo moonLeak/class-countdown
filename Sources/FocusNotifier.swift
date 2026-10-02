@@ -7,9 +7,6 @@ import UserNotifications
 final class FocusNotifier {
 
     func notify(title: String, body: String) {
-        // 开发用的模拟模式下不申请权限，免得弹窗卡住测试
-        guard CalendarService.mockPath == nil else { return }
-
         let center = UNUserNotificationCenter.current()
         center.getNotificationSettings { settings in
             switch settings.authorizationStatus {

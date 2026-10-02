@@ -14,7 +14,7 @@ final class FocusController: ObservableObject {
 
     private let settings: SettingsStore
     private let tick: TickEngine
-    private let store = FocusController.makeStore()
+    private let store = FocusStore()
     private let awake = ScreenAwake()
     private let calendarWriter = FocusCalendarWriter()
     private let notifier = FocusNotifier()
@@ -90,34 +90,6 @@ final class FocusController: ObservableObject {
 
     // MARK: 内部
 
-    /// 开发用模拟模式下不碰真实记录：用临时目录，并从模拟 JSON 的 focusBlocks 填充，
-    /// 这样统计页有数据可看。每条是 { daysAgo, hour, minutes, count }，
-    /// 从当天 hour 点起每隔 30 分钟一个，共 count 个。
-    private static func makeStore() -> FocusStore {
-        guard let path = CalendarService.mockPath else { return FocusStore() }
-        let dir = URL(fileURLWithPath: "/private/tmp/timetool-mock-focus")
-        try? FileManager.default.removeItem(at: dir)
-        let store = FocusStore(directory: dir)
-        guard let data = FileManager.default.contents(atPath: path),
-              let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-        else { return store }
-        let cal = Calendar.current
-        let today = cal.startOfDay(for: Date())
-        for entry in (root["focusBlocks"] as? [[String: Any]]) ?? [] {
-            let daysAgo = (entry["daysAgo"] as? Int) ?? 0
-            let hour = (entry["hour"] as? Double) ?? 9
-            let minutes = (entry["minutes"] as? Double) ?? 25
-            let count = (entry["count"] as? Int) ?? 1
-            guard let day = cal.date(byAdding: .day, value: -daysAgo, to: today) else { continue }
-            for i in 0..<count {
-                let start = day.addingTimeInterval(hour * 3600 + Double(i) * 30 * 60)
-                store.append(FocusBlock(id: UUID(), start: start,
-                                        end: start.addingTimeInterval(minutes * 60),
-                                        duration: minutes * 60, isComplete: true))
-            }
-        }
-        return store
-    }
 
     /// 所有状态变化都走这里：取走结束的专注块、更新常亮与快照
     /// natural 表示是时间走到了而不是用户点的，只有这种情况才发通知
