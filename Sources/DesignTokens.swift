@@ -15,7 +15,7 @@ enum DS {
     // MARK: 堆叠
     /// 每张后卡露出的高度。文字在这一条里垂直居中，不再贴着卡片底边。
     /// 原值 40，按要求收到 2/3。
-    static let peek: CGFloat = 27
+    static let peek: CGFloat = 21
     /// 展开后的卡间距
     static let gap: CGFloat = 10
     /// 每往后一层缩小的比例
@@ -34,7 +34,7 @@ enum DS {
     /// 画布上的百分比只是层级关系的参照。
     static let l1 = Color.primary            // 倒计时数字
     static let l2 = Color.secondary          // 日程名称
-    static let l3 = Color.secondary.opacity(0.78)   // 时间与百分比
+    static let l3 = Color.secondary.opacity(0.78)   // 时间与倒计时
 
     // MARK: 进度条
     static let fillTop: Double = 0.34

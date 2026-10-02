@@ -27,9 +27,9 @@ struct CountdownCard: View {
             // 先裁剪再上玻璃：glassEffect 只画背景，不管内容越界
             .clipShape(DS.cardShape)
             .glassCard()
-            // 收起态的名称与百分比：放在 padding 之外的底部条里，条高 = 露出高度，垂直居中
+            // 收起态的名称与倒计时：放在 padding 之外的底部条里，条高 = 露出高度，垂直居中
             .overlay(alignment: .bottom) {
-                titleRow(showsPercent: true)
+                titleRow(showsCountdown: true)
                     .padding(.horizontal, DS.padX)
                     .frame(width: DS.cardW, height: DS.peek / collapsedScale, alignment: .center)
                     .opacity(1 - fullness)
@@ -80,7 +80,7 @@ struct CountdownCard: View {
     private var content: some View {
         ZStack {
             // 名称有上下两份，靠透明度此消彼长，位置切换才是渐变而不是跳变
-            titleRow(showsPercent: false)
+            titleRow(showsCountdown: false)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .opacity(fullness)
 
@@ -100,14 +100,9 @@ struct CountdownCard: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .opacity(fullness)
 
-            // 底部：起止时间与百分比同一基线
+            // 底部：起止时间
             HStack(spacing: 10) {
                 Text(TimeFormat.range(event.start, event.end))
-                    .font(.system(size: DS.fCaption, weight: DS.wCaption))
-                    .foregroundStyle(DS.l3)
-                    .monospacedDigit()
-                Spacer(minLength: 0)
-                Text(TimeFormat.percent(progress))
                     .font(.system(size: DS.fCaption, weight: DS.wCaption))
                     .foregroundStyle(DS.l3)
                     .monospacedDigit()
@@ -119,15 +114,15 @@ struct CountdownCard: View {
         .padding(.vertical, DS.padY)
     }
 
-    private func titleRow(showsPercent: Bool) -> some View {
+    private func titleRow(showsCountdown: Bool) -> some View {
         HStack(alignment: .center, spacing: 10) {
             Text(event.title)
                 .font(.system(size: DS.fBody, weight: DS.wBody))
                 .foregroundStyle(DS.l2)
                 .lineLimit(1)
-            if showsPercent {
+            if showsCountdown {
                 Spacer(minLength: 0)
-                Text(TimeFormat.percent(progress))
+                Text(countdown)
                     .font(.system(size: DS.fCaption, weight: DS.wCaption))
                     .foregroundStyle(DS.l3)
                     .monospacedDigit()

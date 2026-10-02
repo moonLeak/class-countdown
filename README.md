@@ -168,8 +168,8 @@ that actually releases you. The card notes how many others overlap.
 
 **Overlapping events stack like cards in Wallet.** Each event is one card, so
 nothing is summarised away into a line of small print. The front card sits on
-top and shows everything; the ones behind peek out 40pt below it, just enough
-for their name and percentage. Click to expand, scroll to bring another to the
+top and shows everything; the ones behind peek out 21pt below it, just enough
+for their name and time left. Click to expand, scroll to bring another to the
 front, right-click for the app menu.
 
 **The progress bar takes its colour from the event's calendar.** Orange is

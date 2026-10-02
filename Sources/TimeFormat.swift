@@ -33,10 +33,6 @@ enum TimeFormat {
         return f
     }()
 
-    static func percent(_ p: Double) -> String {
-        "\(Int((p * 100).rounded()))%"
-    }
-
     /// 菜单栏标题截断
     static func truncate(_ title: String, limit: Int = 12) -> String {
         title.count <= limit ? title : String(title.prefix(limit)) + "…"
