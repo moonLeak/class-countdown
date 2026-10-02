@@ -114,7 +114,7 @@ Resume, Skip). You can't pause a break.
 
 ### Settings
 
-Right-click the menu bar item or a card and choose **Settings…** (or press
+Right-click the menu bar item and choose **Settings…**, or use the gear in the pill at the top right of the cards (or press
 Command-comma). It is a regular window with four tabs:
 
 - **General**: language (11, applied immediately), open at login; Appearance: Auto, Light or Dark, plus a *Glass* slider from clear, smooth glass to frosted; menu bar style
@@ -134,6 +134,7 @@ Command-comma). It is a regular window with four tabs:
 | Right-click the menu bar item | Open Calendar, Settings, About, Quit |
 | Click a card | Expand the stack, click again to collapse |
 | Drag any card (when expanded) | Move it within the stack; the order is remembered |
+| Drag a card (when collapsed) | Place the whole stack anywhere on screen; it then stays open until you click the menu bar icon. Settings can put it back under the menu bar |
 | Hover the small circle at a card's top right | It opens into an icon bar: focus, statistics, calendar, settings |
 | Force click a card (trackpad) | The card sinks, Calendar opens, the panel retracts |
 
@@ -157,7 +158,7 @@ Command-comma). It is a regular window with four tabs:
 | `Sources/DesignTokens.swift` | Every number the design settled on, plus the glass material |
 | `Sources/CalendarService.swift` | EventKit wrapper: access, 48-hour window, change notifications |
 | `Sources/ScheduleModel.swift` | State machine: which events are running, seconds left, progress |
-| `Sources/CardStack.swift` | The popover: Wallet-style stack, expand, context menu |
+| `Sources/CardStack.swift` | The popover: Wallet-style stack, expand, drag to reorder and to move |
 | `Sources/Interaction.swift` | Click and force click on one card, in a single NSView |
 | `Sources/Localization.swift` | Runtime string table, 11 languages, switches without a relaunch |
 | `Sources/AppState.swift` | Shared holder for the services |
@@ -209,7 +210,7 @@ that actually releases you. The card notes how many others overlap.
 nothing is summarised away into a line of small print. The front card sits on
 top and shows everything; the ones behind peek out 21pt below it, just enough
 for their name and time left. Click to expand, scroll to bring another to the
-front, right-click for the app menu.
+front. The app menu lives on the menu bar item's right-click and in the pill at the top right of the cards.
 
 **The progress bar takes its colour from the event's calendar.** Orange is
 reserved for the closing-minutes warning, which is why the warning also raises

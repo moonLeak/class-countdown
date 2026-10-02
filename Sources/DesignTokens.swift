@@ -55,6 +55,13 @@ enum DS {
     /// 收起态的位置：卡顶向下 14，距卡右边 18
     static let pillInsetTop: CGFloat = 14
     static let pillInsetRight: CGFloat = 18
+    /// 浮窗阴影三档：静止、鼠标在卡叠上、悬停展开
+    static let pillShadowRest: Double = 0.05
+    static let pillShadowHover: Double = 0.14
+    static let pillShadowActive: Double = 0.22
+    /// 图标悬停时底下小圆的浓度与阴影
+    static let pillIconHoverFill: Double = 0.12
+    static let pillIconHoverShadow: Double = 0.18
     static let pillWidth: Animation = .timingCurve(0.32, 0.72, 0, 1, duration: 0.3)
 
     // MARK: 统计窗口

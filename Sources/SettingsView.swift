@@ -60,6 +60,17 @@ private struct GeneralTab: View {
                 }
             }
 
+            Section(L("sec.cards")) {
+                LabeledContent(L("cards.position")) {
+                    Button(L("cards.reattach")) {
+                        NotificationCenter.default.post(name: .panelReattachRequested, object: nil)
+                    }
+                    .disabled(!settings.panelDetached)
+                }
+                Text(L("cards.position.hint"))
+                    .font(.system(size: DS.fCaption)).foregroundStyle(.secondary)
+            }
+
             Section(L("sec.menubar")) {
                 Picker(L("menubar.style"), selection: $settings.menuBarStyle) {
                     ForEach(MenuBarStyle.allCases) { Text($0.label).tag($0) }

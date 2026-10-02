@@ -64,6 +64,14 @@ final class PanelController: NSObject {
             .sink { [weak self] _ in Task { @MainActor in self?.openSettings() } }
             .store(in: &bag)
 
+        NotificationCenter.default.publisher(for: .panelMovedByUser)
+            .sink { [weak self] _ in Task { @MainActor in self?.didMovePanel() } }
+            .store(in: &bag)
+
+        NotificationCenter.default.publisher(for: .panelReattachRequested)
+            .sink { [weak self] _ in Task { @MainActor in self?.reattachPanel() } }
+            .store(in: &bag)
+
         NotificationCenter.default.publisher(for: .openStatsRequested)
             .sink { [weak self] _ in Task { @MainActor in self?.statsController.show() } }
             .store(in: &bag)
@@ -234,15 +242,7 @@ final class PanelController: NSObject {
         let size = panel.contentView?.fittingSize ?? .zero
         panel.setContentSize(size)
 
-        let onScreen = buttonWindow.convertToScreen(button.convert(button.bounds, to: nil))
-        var x = onScreen.midX - size.width / 2
-        let y = onScreen.minY - size.height
-
-        // 贴着屏幕边缘时往里收，别让面板掉出可见区域
-        if let screen = buttonWindow.screen ?? NSScreen.main {
-            let limit = screen.visibleFrame
-            x = min(max(x, limit.minX + 8), limit.maxX - size.width - 8)
-        }
+        let origin = panelOrigin(size: size, button: button, buttonWindow: buttonWindow)
 
         // 上一次的退场还没落地就取消，否则它会把这次刚开的面板 orderOut 掉
         hideWork?.cancel()
@@ -253,7 +253,8 @@ final class PanelController: NSObject {
         presentation.expanded = false
         presentation.shown = false
 
-        panel.setFrameOrigin(NSPoint(x: x, y: y))
+        panel.level = state.settings.panelDetached ? .floating : .popUpMenu
+        panel.setFrameOrigin(origin)
         // makeKey 而不是 orderFrontRegardless：
         // 不成为 key window，glassEffect 会退回非激活态的材质，
         // 而且第一次点击会被拿去抢 key，于是要点两下才展开。
@@ -261,13 +262,59 @@ final class PanelController: NSObject {
         panel.killShadow()
         isOpen = true
         statusItem.button?.highlight(true)
-        installOutsideMonitor()
+        // 拖走放在桌面上的卡片点别处不收起，只有菜单栏图标能收
+        if !state.settings.panelDetached { installOutsideMonitor() }
 
         // 隔一拍再起，同一帧里赋两次值 SwiftUI 只会看到最后那个，动画就没了
         DispatchQueue.main.async { [weak self] in
             guard let self, self.isOpen else { return }
             withAnimation(DS.appear) { self.presentation.shown = true }
         }
+    }
+
+    /// 面板该放在哪里。默认挂在菜单栏图标下方；被拖走过就回到记住的位置，
+    /// 那块屏幕不在了就退回图标下方
+    private func panelOrigin(size: NSSize, button: NSStatusBarButton, buttonWindow: NSWindow) -> NSPoint {
+        let s = state.settings
+        if s.panelDetached {
+            let top = CGFloat(s.panelTop)
+            let rect = NSRect(x: CGFloat(s.panelLeft), y: top - size.height,
+                              width: size.width, height: size.height)
+            if NSScreen.screens.contains(where: { $0.visibleFrame.intersects(rect) }) {
+                return rect.origin
+            }
+        }
+        let onScreen = buttonWindow.convertToScreen(button.convert(button.bounds, to: nil))
+        var x = onScreen.midX - size.width / 2
+        // 贴着屏幕边缘时往里收，别让面板掉出可见区域
+        if let screen = buttonWindow.screen ?? NSScreen.main {
+            let limit = screen.visibleFrame
+            x = min(max(x, limit.minX + 8), limit.maxX - size.width - 8)
+        }
+        return NSPoint(x: x, y: onScreen.minY - size.height)
+    }
+
+    /// 用户拖动了整组卡片：记住左上角，转成桌面小组件的行为
+    private func didMovePanel() {
+        let f = panel.frame
+        let s = state.settings
+        s.panelLeft = Double(f.minX)
+        s.panelTop = Double(f.maxY)
+        if !s.panelDetached {
+            s.panelDetached = true
+            panel.level = .floating
+            removeOutsideMonitor()
+        }
+    }
+
+    /// 回到菜单栏图标下方，恢复点别处就收起的行为
+    private func reattachPanel() {
+        state.settings.panelDetached = false
+        guard isOpen, let button = statusItem.button, let win = button.window else { return }
+        panel.level = .popUpMenu
+        let origin = panelOrigin(size: panel.frame.size, button: button, buttonWindow: win)
+        panel.setFrameOrigin(origin)
+        installOutsideMonitor()
     }
 
     /// 先让内容层缩回菜单栏，窗口等动画跑完再下线。

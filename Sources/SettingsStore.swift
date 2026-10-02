@@ -137,6 +137,9 @@ final class SettingsStore: ObservableObject {
         static let notifyOnEnd       = "focus.notifyOnEnd"
         static let cardClarity       = "cards.clarity"
         static let appearance        = "app.appearance"
+        static let panelDetached     = "panel.detached"
+        static let panelLeft         = "panel.left"
+        static let panelTop          = "panel.top"
     }
 
     /// 存“排除”而不是“勾选”，这样新加的日历默认参与倒计时
@@ -243,6 +246,18 @@ final class SettingsStore: ObservableObject {
         }
     }
 
+    /// 卡片被拖离了菜单栏下方。拖走之后记住左上角的位置，下次在原处打开，
+    /// 点别处也不收起，像桌面上的一个小组件
+    @Published var panelDetached: Bool {
+        didSet { defaults.set(panelDetached, forKey: Key.panelDetached) }
+    }
+    @Published var panelLeft: Double {
+        didSet { defaults.set(panelLeft, forKey: Key.panelLeft) }
+    }
+    @Published var panelTop: Double {
+        didSet { defaults.set(panelTop, forKey: Key.panelTop) }
+    }
+
     var focusConfig: FocusConfig {
         FocusConfig(focusDuration: TimeInterval(focusMinutes) * 60,
                     shortBreakDuration: TimeInterval(shortBreakMinutes) * 60,
@@ -284,7 +299,8 @@ final class SettingsStore: ObservableObject {
             Key.focusCalendarID: "",
             Key.notifyOnEnd: true,
             Key.cardClarity: DS.cardClarityDefault,
-            Key.appearance: AppAppearance.system.rawValue
+            Key.appearance: AppAppearance.system.rawValue,
+            Key.panelDetached: false
         ])
         self.excludedCalendarIDs = Set(defaults.stringArray(forKey: Key.excludedCalendars) ?? [])
         self.includeAllDay      = defaults.bool(forKey: Key.includeAllDay)
@@ -316,6 +332,9 @@ final class SettingsStore: ObservableObject {
                                   ?? DS.cardClarityDefault
         self.appearance         = AppAppearance(rawValue: defaults.string(forKey: Key.appearance) ?? "")
                                   ?? .system
+        self.panelDetached      = defaults.bool(forKey: Key.panelDetached)
+        self.panelLeft          = defaults.double(forKey: Key.panelLeft)
+        self.panelTop           = defaults.double(forKey: Key.panelTop)
         NSApplication.shared.appearance = self.appearance.nsAppearance
         // didSet 在 init 里不触发，这里补一次
         L10n.shared.apply(self.language)

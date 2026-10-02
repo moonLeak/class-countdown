@@ -11,6 +11,8 @@ struct InteractionArea: NSViewRepresentable {
     var onForceClick: () -> Void
     /// 按压深度反馈：进入二段时回 true，松手回 false
     var onPressing: (Bool) -> Void
+    /// 拖动整个窗口之后回调。和 onDrag 互斥：有 onDrag 时拖动是排序
+    var onWindowMoved: (() -> Void)? = nil
     /// 垂直拖动：位移（向下为正）与是否结束。为 nil 时不响应拖动。
     var onDrag: ((CGFloat, Bool) -> Void)? = nil
 
@@ -20,6 +22,7 @@ struct InteractionArea: NSViewRepresentable {
         v.onForce = onForceClick
         v.onPressing = onPressing
         v.onDrag = onDrag
+        v.onWindowMoved = onWindowMoved
         return v
     }
 
@@ -28,6 +31,7 @@ struct InteractionArea: NSViewRepresentable {
         v.onForce = onForceClick
         v.onPressing = onPressing
         v.onDrag = onDrag
+        v.onWindowMoved = onWindowMoved
     }
 }
 
@@ -37,9 +41,11 @@ final class PressureView: NSView {
     var onForce: () -> Void = {}
     var onPressing: (Bool) -> Void = { _ in }
     var onDrag: ((CGFloat, Bool) -> Void)?
+    var onWindowMoved: (() -> Void)?
 
     private var forcedThisDrag = false
     private var dragStartY: CGFloat = 0
+    private var dragStartX: CGFloat = 0
     private var dragging = false
 
     override init(frame frameRect: NSRect) {
@@ -56,10 +62,23 @@ final class PressureView: NSView {
         forcedThisDrag = false
         dragging = false
         dragStartY = event.locationInWindow.y
+        dragStartX = event.locationInWindow.x
     }
 
     override func mouseDragged(with event: NSEvent) {
-        guard let onDrag, !forcedThisDrag else { return }
+        guard !forcedThisDrag else { return }
+        // 没有排序手势时，拖动就是移动整个窗口。performDrag 会接管到松手为止，
+        // 松手事件被它吃掉，所以不会再当成一次单击
+        if onDrag == nil, let moved = onWindowMoved, let window {
+            let p = event.locationInWindow
+            if hypot(p.x - dragStartX, p.y - dragStartY) > 4 {
+                onPressing(false)
+                window.performDrag(with: event)
+                moved()
+            }
+            return
+        }
+        guard let onDrag else { return }
         // 窗口坐标 y 向上，界面坐标向下，取反
         let dy = dragStartY - event.locationInWindow.y
         if !dragging, abs(dy) > 4 { dragging = true }
@@ -88,14 +107,4 @@ final class PressureView: NSView {
         onForce()
     }
 
-    /// 右键菜单挂在 SwiftUI 那边的父视图上。
-    /// 这块盖在最上面，得把菜单请求往上传，否则右键点在卡片上没反应。
-    override func menu(for event: NSEvent) -> NSMenu? {
-        var v: NSView? = superview
-        while let cur = v {
-            if let m = cur.menu(for: event) { return m }
-            v = cur.superview
-        }
-        return super.menu(for: event)
-    }
 }

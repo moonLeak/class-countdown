@@ -43,6 +43,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 extension Notification.Name {
     /// 面板尺寸要跟着内容变，靠这个通知从 SwiftUI 那侧推过来
     static let panelContentResized = Notification.Name("panelContentResized")
+    /// 用户把整组卡片拖到了新位置
+    static let panelMovedByUser = Notification.Name("panelMovedByUser")
+    /// 设置里点了“回到菜单栏下方”
+    static let panelReattachRequested = Notification.Name("panelReattachRequested")
     /// 卡片上的统计图标或浮窗里的统计入口
     static let openStatsRequested = Notification.Name("openStatsRequested")
     /// 右键菜单里点了设置

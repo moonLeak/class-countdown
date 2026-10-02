@@ -349,6 +349,17 @@ private let l10nTable: [String: [String: String]] = [
             "zh-Hant": "往「通透」滑，玻璃越光滑，桌面透得越清楚；往「磨砂」滑，模糊越重，文字越好讀。",
             "en": "Toward Clear the glass gets smoother and your desktop shows through more sharply. Toward Frosted it blurs more and text is easier to read."],
 
+        "sec.cards": [
+            "zh-Hans": "卡片", "zh-Hant": "卡片", "en": "Cards"],
+        "cards.position": [
+            "zh-Hans": "位置", "zh-Hant": "位置", "en": "Position"],
+        "cards.reattach": [
+            "zh-Hans": "回到菜单栏下方", "zh-Hant": "回到選單列下方", "en": "Back Under Menu Bar"],
+        "cards.position.hint": [
+            "zh-Hans": "收起时拖动卡片可以把整组放到屏幕任何地方。放到别处后点其他地方不会收起，用菜单栏图标收起。",
+            "zh-Hant": "收起時拖動卡片可以把整組放到螢幕任何地方。放到別處後點其他地方不會收起，用選單列圖示收起。",
+            "en": "Drag a collapsed card to place the whole stack anywhere on screen. Once placed, it stays open until you click the menu bar icon."],
+
         "sec.menubar": [
             "zh-Hans": "菜单栏", "zh-Hant": "選單列", "en": "Menu Bar", "ja": "メニューバー",
             "ko": "메뉴 막대", "de": "Menüleiste", "fr": "Barre des menus",

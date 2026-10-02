@@ -100,7 +100,7 @@ xattr -dr com.apple.quarantine /Applications/TimeTool.app
 
 ### 设置
 
-右键菜单栏图标或卡片，选「设置…」（也可以按 Command+逗号）。设置是一个标准窗口，
+右键菜单栏图标选「设置…」，或点卡片右上角浮窗里的齿轮（也可以按 Command+逗号）。设置是一个标准窗口，
 有四个标签：
 
 - **通用**：界面语言（11 种，改完当场生效）、登录时打开；外观：跟随系统、浅色、深色，以及「玻璃质感」滑块（从通透的光滑玻璃到磨砂）；菜单栏的样式（圆环或徽标）、
@@ -118,6 +118,7 @@ xattr -dr com.apple.quarantine /Applications/TimeTool.app
 | 右键菜单栏图标 | 打开日历、设置、关于、退出 |
 | 单击卡片 | 展开整叠，再点一次收起 |
 | 拖动任意卡片（展开后） | 换它在卡叠里的位置，重启后保持 |
+| 拖动卡片（收起时） | 把整组卡片放到屏幕任何地方，之后点别处不收起；设置里可回到菜单栏下方 |
 | 鼠标移到卡片右上角的小圆 | 展开成图标条：专注、统计、日历、设置 |
 | 二段重按卡片（触控板） | 卡片下沉，跳转日历，面板随后收回 |
 
@@ -141,7 +142,7 @@ xattr -dr com.apple.quarantine /Applications/TimeTool.app
 | `Sources/DesignTokens.swift` | 设计定下的全部数值，以及玻璃材质 |
 | `Sources/CalendarService.swift` | EventKit 封装：权限、48 小时窗口拉取、变更监听 |
 | `Sources/ScheduleModel.swift` | 状态机：哪些日程正在进行、剩余秒数、进度比例 |
-| `Sources/CardStack.swift` | 弹出面板：卡包式堆叠、展开、右键菜单 |
+| `Sources/CardStack.swift` | 弹出面板：卡包式堆叠、展开、拖动排序与移动 |
 | `Sources/Interaction.swift` | 单击与二段重按，同一个 NSView 接住，只作用于被按的那张卡 |
 | `Sources/Localization.swift` | 运行时文案表，11 种语言，切换不用重启 |
 | `Sources/AppState.swift` | 各服务的共同持有者 |
@@ -188,7 +189,7 @@ xattr -dr com.apple.quarantine /Applications/TimeTool.app
 
 **重叠日程堆成一叠卡包。** 一个日程就是一张卡，不再把它们压缩成一行小字。
 最前面那张完整显示，后面的往下露出 21 点，刚好够读完名称和倒计时。
-单击展开收起，右键出应用菜单。
+单击展开收起，应用菜单在菜单栏图标的右键和卡片右上角的浮窗里。
 
 **进度条用日程所属日历的颜色。** 橙色专门留给临近结束的警示，
 所以警示除了换色还会提高填充浓度，万一某个日历本身就是橙色，状态变化仍然读得出来。

@@ -7,6 +7,8 @@ struct QuickPill: View {
 
     /// 整叠是否展开
     let expanded: Bool
+    /// 鼠标是否在卡叠范围内。不在时浮窗只留很淡的阴影，不抢眼
+    let stackHovered: Bool
     let onFocusTap: () -> Void
     let onStatsTap: () -> Void
     let onCalendarTap: () -> Void
@@ -40,22 +42,50 @@ struct QuickPill: View {
         .frame(width: open ? barWidth : DS.pillH, height: DS.pillH, alignment: .trailing)
         .clipShape(Capsule())
         .glassCapsule()
-        .shadow(color: .black.opacity(0.25), radius: 7, y: 4)
+        .shadow(color: .black.opacity(shadow.opacity), radius: shadow.radius, y: shadow.y)
+        .animation(DS.fade, value: stackHovered)
         .contentShape(Capsule())
         .onHover { h in withAnimation(widthAnimation) { hovering = h } }
         .animation(widthAnimation, value: open)
     }
 
+    /// 三档阴影：鼠标不在卡叠上时很淡；在卡叠上时正常；悬停在浮窗上展开时最明显
+    private var shadow: (opacity: Double, radius: CGFloat, y: CGFloat) {
+        if hovering { return (DS.pillShadowActive, 7, 4) }
+        if stackHovered || expanded { return (DS.pillShadowHover, 5, 3) }
+        return (DS.pillShadowRest, 3, 1)
+    }
+
     private func pillButton(_ symbol: String, _ label: String,
                             _ action: @escaping () -> Void) -> some View {
+        PillIcon(symbol: symbol, label: label, action: action)
+    }
+}
+
+/// 浮窗里的一个图标。鼠标移上去时底下浮起一个小圆，带一点阴影，强调当前这个
+private struct PillIcon: View {
+    let symbol: String
+    let label: String
+    let action: () -> Void
+    @State private var hovered = false
+
+    var body: some View {
         Button(action: action) {
             Image(systemName: symbol)
-                .font(.system(size: DS.pillIcon, weight: .regular))
+                .font(.system(size: DS.pillIcon, weight: hovered ? .semibold : .regular))
                 .foregroundStyle(DS.l1)
                 .frame(width: DS.pillHit, height: DS.pillHit)
+                .background(
+                    Circle()
+                        .fill(SwiftUI.Color.primary.opacity(hovered ? DS.pillIconHoverFill : 0))
+                        .shadow(color: .black.opacity(hovered ? DS.pillIconHoverShadow : 0),
+                                radius: 3, y: 1)
+                )
+                .scaleEffect(hovered ? 1.06 : 1)
                 .contentShape(Circle())
         }
         .buttonStyle(PressableStyle())
+        .onHover { h in withAnimation(DS.toggle) { hovered = h } }
         .accessibilityLabel(Text(label))
     }
 }

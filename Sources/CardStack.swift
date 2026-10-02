@@ -21,7 +21,7 @@ private enum StackItem: Identifiable {
 }
 
 /// 弹出面板：日程卡和 Flow 卡堆成一叠卡包。
-/// 单击展开收起，二段重按打开日历，右键出应用菜单。
+/// 单击展开收起，二段重按打开日历。收起时拖动是移动整组，展开后拖动是排序。
 /// Flow 卡默认在最底层，展开后可以拖动换位置，位置会记住。
 /// 面板自身不画背景，卡片直接浮在桌面上。
 struct CardStack: View {
@@ -49,6 +49,8 @@ struct CardStack: View {
     @State private var drag: (id: String, startIndex: Int, dy: CGFloat)? = nil
     /// 浮窗定位图标点过之后，Flow 卡边框亮一下
     @State private var flowHighlight = false
+    /// 鼠标是否在卡叠范围内，决定浮窗阴影的浓淡
+    @State private var stackHovered = false
 
     private var expanded: Bool { presentation.expanded }
 
@@ -118,7 +120,6 @@ struct CardStack: View {
             .environment(\.cardClarity, settings.cardClarity)
             .scaleEffect(presentation.shown ? 1 : DS.appearScale, anchor: .top)
             .opacity(presentation.shown ? 1 : 0)
-            .contextMenu { menuItems }
             .onAppear { postHeight() }
             .onChange(of: presentation.shown) { _, shown in
                 if !shown { pressedIndex = nil; drag = nil }
@@ -133,23 +134,6 @@ struct CardStack: View {
         NotificationCenter.default.post(
             name: .panelContentResized, object: nil,
             userInfo: ["height": panelHeight()])
-    }
-
-    // MARK: 菜单：应用级操作，挂在整叠上而不是某张卡上
-
-    @ViewBuilder
-    private var menuItems: some View {
-        Button(L("menu.openCalendar")) { openCalendar() }
-        Divider()
-        Button(L("menu.settings")) {
-            NotificationCenter.default.post(name: .openSettingsRequested, object: nil)
-        }
-        Button(L("menu.about")) {
-            NSApp.activate(ignoringOtherApps: true)
-            NSApp.orderFrontStandardAboutPanel(nil)
-        }
-        Divider()
-        Button(L("menu.quit")) { NSWorkspaceBridge.quit() }
     }
 
     // MARK: 交互：单击展开，二段重按开日历
@@ -182,6 +166,10 @@ struct CardStack: View {
             onPressing: { down in
                 withAnimation(DS.press) { pressedIndex = down ? index : nil }
             },
+            // 收起时拖动任意一张卡就是拖动整组卡片，可以放到屏幕任何地方
+            onWindowMoved: expanded ? nil : {
+                NotificationCenter.default.post(name: .panelMovedByUser, object: nil)
+            },
             onDrag: expanded ? { dy, finished in
                 // 起点只在第一下记，之后 index 会随着让位变化
                 let start = (drag?.id == id) ? drag!.startIndex : index
@@ -211,6 +199,7 @@ struct CardStack: View {
 
             QuickPill(
                 expanded: expanded,
+                stackHovered: stackHovered,
                 onFocusTap: { locateFlow() },
                 onStatsTap: {
                     NotificationCenter.default.post(name: .openStatsRequested, object: nil)
@@ -227,6 +216,7 @@ struct CardStack: View {
         .frame(width: DS.cardW,
                height: stackHeight(expanded: true, count: list.count) + DS.stackShift,
                alignment: .top)
+        .onHover { h in stackHovered = h }
     }
 
     /// 整叠展开并让 Flow 卡亮一下，帮用户找到它
