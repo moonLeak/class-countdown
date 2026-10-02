@@ -11,6 +11,15 @@ struct TimeToolApp: App {
         // 这里只是占位：SwiftUI 的 App 至少要有一个 Scene，
         // 而 Settings 场景不会自己冒出来。
         Settings { EmptyView() }
+            .commands {
+                // 系统自带的“设置…”会打开上面那个空场景，换成我们自己的窗口
+                CommandGroup(replacing: .appSettings) {
+                    Button(L("menu.settings")) {
+                        NotificationCenter.default.post(name: .openSettingsRequested, object: nil)
+                    }
+                    .keyboardShortcut(",", modifiers: .command)
+                }
+            }
     }
 }
 

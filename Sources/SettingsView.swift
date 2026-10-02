@@ -1,23 +1,34 @@
 import SwiftUI
 import EventKit
 
-/// 设置面板。措辞按 macOS 系统设置的习惯：
+/// 设置窗口的内容区，随工具栏标签切换。措辞按 macOS 系统设置的习惯：
 /// 左侧是名词短语的标签，语义交给右侧的控件承担。
-struct SettingsView: View {
+struct SettingsRoot: View {
+    @ObservedObject var navigation: SettingsNavigation
     @ObservedObject var settings: SettingsStore
     @ObservedObject var calendarService: CalendarService
     /// 语言一改，这里立刻重画
     @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
-        TabView {
-            general.tabItem { Label(L("tab.general"), systemImage: "gearshape") }
-            calendars.tabItem { Label(L("tab.calendars"), systemImage: "calendar") }
+        Group {
+            switch navigation.tab {
+            case .general:   GeneralTab(settings: settings)
+            case .calendars: CalendarsTab(settings: settings, calendarService: calendarService)
+            case .focus:     FocusTab()
+            case .about:     AboutTab()
+            }
         }
-        .frame(width: 440, height: 400)
+        // 窗口很宽时内容居中，最大宽取自设计规格
+        .frame(maxWidth: DS.settingsContentMaxW)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
+}
 
-    private var general: some View {
+private struct GeneralTab: View {
+    @ObservedObject var settings: SettingsStore
+
+    var body: some View {
         Form {
             Section(L("tab.general")) {
                 Picker(L("row.language"), selection: $settings.language) {
@@ -49,36 +60,19 @@ struct SettingsView: View {
                 }
                 .disabled(!settings.showsTitleInMenuBar)
             }
-
-            Section(L("sec.countdown")) {
-                Toggle(L("row.includeAllDay"), isOn: $settings.includeAllDay)
-                Picker(L("row.warn"), selection: $settings.warnSeconds) {
-                    Text(L("warn.off")).tag(0)
-                    Text(L("warn.minutes", 1)).tag(60)
-                    Text(L("warn.minutes", 3)).tag(180)
-                    Text(L("warn.minutes", 5)).tag(300)
-                    Text(L("warn.minutes", 10)).tag(600)
-                }
-            }
-
-            Section {
-                HStack {
-                    Text(L("row.quitApp"))
-                    Spacer()
-                    Button(L("menu.quit"), role: .destructive) { NSWorkspaceBridge.quit() }
-                }
-            }
         }
         .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
     }
+}
 
-    private var calendars: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(L("calendars.hint"))
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 4)
-            List {
+private struct CalendarsTab: View {
+    @ObservedObject var settings: SettingsStore
+    @ObservedObject var calendarService: CalendarService
+
+    var body: some View {
+        Form {
+            Section {
                 ForEach(calendarService.calendars, id: \.calendarIdentifier) { cal in
                     Toggle(isOn: Binding(
                         get: { settings.isEnabled(calendarID: cal.calendarIdentifier) },
@@ -95,9 +89,75 @@ struct SettingsView: View {
                         }
                     }
                 }
+            } header: {
+                Text(L("tab.calendars"))
+            } footer: {
+                Text(L("calendars.hint"))
+            }
+
+            Section(L("sec.countdown")) {
+                Toggle(L("row.includeAllDay"), isOn: $settings.includeAllDay)
+                Picker(L("row.warn"), selection: $settings.warnSeconds) {
+                    Text(L("warn.off")).tag(0)
+                    Text(L("warn.minutes", 1)).tag(60)
+                    Text(L("warn.minutes", 3)).tag(180)
+                    Text(L("warn.minutes", 5)).tag(300)
+                    Text(L("warn.minutes", 10)).tag(600)
+                }
             }
         }
-        .padding()
+        .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
+    }
+}
+
+/// 专注页在 FocusEngine 接上之前先放占位
+private struct FocusTab: View {
+    var body: some View {
+        Text(L("focus.placeholder"))
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private struct AboutTab: View {
+    private var version: String {
+        (Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String) ?? ""
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                VStack(spacing: 6) {
+                    Image(systemName: "timer")
+                        .font(.system(size: 44, weight: .regular))
+                        .foregroundStyle(.white)
+                        .frame(width: 88, height: 88)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                .fill(LinearGradient(
+                                    colors: [DS.Color.eventDefault, DS.Color.focus],
+                                    startPoint: .topLeading, endPoint: .bottomTrailing))
+                        )
+                    Text("TimeTool")
+                        .font(.title2.weight(.semibold))
+                        .padding(.top, 8)
+                    Text(String(format: L("about.version"), version))
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+            }
+
+            Section(L("sec.other")) {
+                LabeledContent(L("row.quitApp")) {
+                    Button(L("menu.quit"), role: .destructive) { NSWorkspaceBridge.quit() }
+                        .foregroundStyle(DS.Color.danger)
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
     }
 }
 

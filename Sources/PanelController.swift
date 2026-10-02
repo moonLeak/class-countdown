@@ -13,7 +13,6 @@ final class PanelController: NSObject {
 
     private var statusItem: NSStatusItem!
     private var panel: TransparentPanel!
-    private var settingsWindow: NSWindow?
     private var outsideMonitor: Any?
     private var bag = Set<AnyCancellable>()
     /// 退场那一下的延时任务。中途又被打开就取消掉，
@@ -27,6 +26,8 @@ final class PanelController: NSObject {
     private var isOpen = false
 
     private let state = AppState.shared
+    private lazy var settingsController = SettingsWindowController(
+        settings: state.settings, calendarService: state.calendar)
 
     /// 编译时刻，由 build.sh 写进 CFBundleVersion
     static var buildStamp: String {
@@ -122,33 +123,10 @@ final class PanelController: NSObject {
 
     // MARK: 设置窗口
 
-    /// 自己建这个窗口。
-    /// openSettings 环境值和 showSettingsWindow: 都要求调用方在 SwiftUI 的
-    /// Settings 场景的响应链里，而面板是独立的 NSHostingView，够不着，
-    /// 所以点了没反应。
+    /// 设置是标准窗口，由 SettingsWindowController 管。
+    /// 不关面板：设置和卡片是两件独立的事，开着设置的同时该能继续看倒计时。
     private func openSettings() {
-        // 不关面板：设置窗口和卡片是两件独立的事，
-        // 开着设置的同时该能继续看倒计时。
-        if settingsWindow == nil {
-            let w = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 440, height: 400),
-                styleMask: [.titled, .closable, .miniaturizable],
-                backing: .buffered, defer: false
-            )
-            w.contentView = NSHostingView(
-                rootView: SettingsView(settings: state.settings,
-                                       calendarService: state.calendar))
-            w.isReleasedWhenClosed = false   // 关掉之后还要能再打开
-            w.center()
-            settingsWindow = w
-        }
-        // 语言可能已经变过，每次打开都重取一次标题
-        settingsWindow?.title = L("settings.title")
-
-        // LSUIElement 的应用不在 Dock 里，不激活就会被压在别的窗口后面
-        NSApp.activate(ignoringOtherApps: true)
-        settingsWindow?.makeKeyAndOrderFront(nil)
-        settingsWindow?.orderFrontRegardless()
+        settingsController.show()
     }
 
     // MARK: 面板

@@ -21,6 +21,14 @@ enum DS {
     /// 每往后一层缩小的比例
     static let shrink: CGFloat = 0.04
 
+    // MARK: 设置窗口
+    static let settingsW: CGFloat = 540
+    static let settingsH: CGFloat = 600
+    static let settingsMinW: CGFloat = 420
+    static let settingsMinH: CGFloat = 380
+    /// 内容区最大宽，窗口更宽时居中
+    static let settingsContentMaxW: CGFloat = 560
+
     // MARK: 字号与字重（三级，一一对应）
     static let fDisplay: CGFloat = 54
     static let wDisplay: Font.Weight = .medium      // 500
@@ -32,9 +40,9 @@ enum DS {
     // MARK: 明暗
     /// 用语义色而非写死的透明度：系统会按背景自动调整，
     /// 画布上的百分比只是层级关系的参照。
-    static let l1 = Color.primary            // 倒计时数字
-    static let l2 = Color.secondary          // 日程名称
-    static let l3 = Color.secondary.opacity(0.78)   // 时间与倒计时
+    static let l1 = SwiftUI.Color.primary            // 倒计时数字
+    static let l2 = SwiftUI.Color.secondary          // 日程名称
+    static let l3 = SwiftUI.Color.secondary.opacity(0.78)   // 时间与倒计时
 
     // MARK: 进度条
     static let fillTop: Double = 0.34
@@ -46,7 +54,18 @@ enum DS {
     static let warnFillBottom: Double = 0.34
     static let warnEdgeAlpha: Double = 0.88
     /// 警示色。这个色位专留给警示，不作为任何日历的颜色。
-    static let warn = Color(red: 1.0, green: 0.624, blue: 0.039)   // #FF9F0A
+    static let warn = SwiftUI.Color(red: 1.0, green: 0.624, blue: 0.039)   // #FF9F0A
+
+    // MARK: 状态色
+    /// 命名空间 DS.Color。在 DS 内部写 Color 指的是它，要用 SwiftUI 的写 SwiftUI.Color。
+    enum Color {
+        /// 专注与休息，统一用绿色
+        static let focus = SwiftUI.Color(red: 48 / 255, green: 209 / 255, blue: 88 / 255)   // #30D158
+        /// 退出等破坏性操作
+        static let danger = SwiftUI.Color(red: 1.0, green: 69 / 255, blue: 58 / 255)       // #FF453A
+        /// 日历没有颜色时的兜底
+        static let eventDefault = SwiftUI.Color(red: 10 / 255, green: 132 / 255, blue: 1.0) // #0A84FF
+    }
 
     // MARK: 动效
     /// 与设计画布同一条曲线：cubic-bezier(.32, .72, 0, 1)，起步快收尾慢。

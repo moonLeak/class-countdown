@@ -151,6 +151,22 @@ private let l10nTable: [String: [String: String]] = [
             "ko": "캘린더", "de": "Kalender", "fr": "Calendriers",
             "es": "Calendarios", "pt": "Calendários", "ru": "Календари"],
 
+        "tab.focus": [
+            "zh-Hans": "专注", "zh-Hant": "專注", "en": "Focus"],
+
+        "tab.about": [
+            "zh-Hans": "关于", "zh-Hant": "關於", "en": "About"],
+
+        "focus.placeholder": [
+            "zh-Hans": "专注功能正在开发中。", "zh-Hant": "專注功能開發中。",
+            "en": "Focus is coming soon."],
+
+        "about.version": [
+            "zh-Hans": "版本 %@", "zh-Hant": "版本 %@", "en": "Version %@"],
+
+        "sec.other": [
+            "zh-Hans": "其他", "zh-Hant": "其他", "en": "Other"],
+
         "sec.menubar": [
             "zh-Hans": "菜单栏", "zh-Hant": "選單列", "en": "Menu Bar", "ja": "メニューバー",
             "ko": "메뉴 막대", "de": "Menüleiste", "fr": "Barre des menus",
