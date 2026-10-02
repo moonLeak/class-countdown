@@ -5,6 +5,12 @@ import AppKit
 enum NSWorkspaceNotificationBridge {
     private static var tokens: [NSObjectProtocol] = []
 
+    static func onSleep(_ handler: @escaping () -> Void) {
+        tokens.append(NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.willSleepNotification, object: nil, queue: .main
+        ) { _ in handler() })
+    }
+
     static func onWake(_ handler: @escaping () -> Void) {
         let center = NSWorkspace.shared.notificationCenter
         tokens.append(center.addObserver(

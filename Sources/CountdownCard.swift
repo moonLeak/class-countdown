@@ -47,34 +47,18 @@ struct CountdownCard: View {
             let w = geo.size.width * progress
             ZStack(alignment: .leading) {
                 Color.clear
-                bar(color: event.calendarColor,
-                    top: DS.fillTop, bottom: DS.fillBottom,
-                    edge: DS.edgeAlpha, width: w)
+                ProgressFill.bar(color: event.calendarColor,
+                                 top: DS.fillTop, bottom: DS.fillBottom,
+                                 edge: DS.edgeAlpha, width: w)
                     .opacity(warning ? 0 : 1)
-                bar(color: DS.warn,
-                    top: DS.warnFillTop, bottom: DS.warnFillBottom,
-                    edge: DS.warnEdgeAlpha, width: w)
+                ProgressFill.bar(color: DS.warn,
+                                 top: DS.warnFillTop, bottom: DS.warnFillBottom,
+                                 edge: DS.warnEdgeAlpha, width: w)
                     .opacity(warning ? 1 : 0)
             }
         }
         // 只在 warning 翻转时animate，进度条每秒的增长不受影响
         .animation(DS.warnShift, value: warning)
-    }
-
-    private func bar(color: Color, top: Double, bottom: Double,
-                     edge: Double, width w: CGFloat) -> some View {
-        ZStack(alignment: .leading) {
-            LinearGradient(
-                colors: [color.opacity(top), color.opacity(bottom)],
-                startPoint: .top, endPoint: .bottom
-            )
-            .frame(width: w)
-            Rectangle()
-                .fill(color.opacity(edge))
-                .frame(width: 1)
-                .offset(x: w)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     }
 
     private var content: some View {
@@ -128,5 +112,24 @@ struct CountdownCard: View {
                     .monospacedDigit()
             }
         }
+    }
+}
+
+/// EventCard 与 FlowCard 共用的进度填充：一条从左长到右的渐变加右边缘线
+enum ProgressFill {
+    static func bar(color: Color, top: Double, bottom: Double,
+                    edge: Double, width w: CGFloat) -> some View {
+        ZStack(alignment: .leading) {
+            LinearGradient(
+                colors: [color.opacity(top), color.opacity(bottom)],
+                startPoint: .top, endPoint: .bottom
+            )
+            .frame(width: w)
+            Rectangle()
+                .fill(color.opacity(edge))
+                .frame(width: 1)
+                .offset(x: w)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     }
 }

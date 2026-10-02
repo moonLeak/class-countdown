@@ -157,10 +157,6 @@ private let l10nTable: [String: [String: String]] = [
         "tab.about": [
             "zh-Hans": "关于", "zh-Hant": "關於", "en": "About"],
 
-        "focus.placeholder": [
-            "zh-Hans": "专注功能正在开发中。", "zh-Hant": "專注功能開發中。",
-            "en": "Focus is coming soon."],
-
         "about.version": [
             "zh-Hans": "版本 %@", "zh-Hant": "版本 %@", "en": "Version %@"],
 
@@ -188,6 +184,83 @@ private let l10nTable: [String: [String: String]] = [
             "zh-Hans": "没有进行中的日程时，菜单栏显示下一个日程的倒计时",
             "zh-Hant": "沒有進行中的行程時，選單列顯示下一個行程的倒數",
             "en": "When nothing is running, the menu bar counts down to the next event"],
+
+        "flow.title.focus": [
+            "zh-Hans": "专注", "zh-Hant": "專注", "en": "Focus"],
+
+        "flow.button.start": [
+            "zh-Hans": "开始", "zh-Hant": "開始", "en": "Start"],
+
+        "flow.button.pause": [
+            "zh-Hans": "暂停", "zh-Hant": "暫停", "en": "Pause"],
+
+        "flow.button.resume": [
+            "zh-Hans": "继续", "zh-Hant": "繼續", "en": "Resume"],
+
+        "flow.button.skip": [
+            "zh-Hans": "跳过", "zh-Hant": "跳過", "en": "Skip"],
+
+        "flow.break.0": [
+            "zh-Hans": "休息一下", "zh-Hant": "休息一下", "en": "Take a Break"],
+
+        "flow.break.1": [
+            "zh-Hans": "出去走走", "zh-Hant": "出去走走", "en": "Go for a Walk"],
+
+        "flow.break.2": [
+            "zh-Hans": "看看远处", "zh-Hant": "看看遠處", "en": "Look Into the Distance"],
+
+        "flow.break.3": [
+            "zh-Hans": "活动一下腿脚", "zh-Hant": "活動一下腿腳", "en": "Stretch Your Legs"],
+
+        "flow.break.4": [
+            "zh-Hans": "离开屏幕一会儿", "zh-Hant": "離開螢幕一會兒",
+            "en": "Step Away from the Screen"],
+
+        "flow.longBreak": [
+            "zh-Hans": "好好休息一阵", "zh-Hant": "好好休息一陣", "en": "Take a Long Break"],
+
+        "flow.a11y.reset": [
+            "zh-Hans": "重置", "zh-Hant": "重置", "en": "Reset"],
+
+        "flow.a11y.stats": [
+            "zh-Hans": "统计", "zh-Hant": "統計", "en": "Statistics"],
+
+        "stats.title": [
+            "zh-Hans": "统计", "zh-Hant": "統計", "en": "Statistics"],
+
+        "stats.placeholder": [
+            "zh-Hans": "统计功能正在开发中。", "zh-Hant": "統計功能開發中。",
+            "en": "Statistics is coming soon."],
+
+        "focus.sec.durations": [
+            "zh-Hans": "时长", "zh-Hant": "時長", "en": "Durations"],
+
+        "focus.focusMinutes": [
+            "zh-Hans": "专注", "zh-Hant": "專注", "en": "Focus"],
+
+        "focus.shortBreak": [
+            "zh-Hans": "短休息", "zh-Hant": "短休息", "en": "Short break"],
+
+        "focus.longBreak": [
+            "zh-Hans": "长休息", "zh-Hant": "長休息", "en": "Long break"],
+
+        "unit.minutes": [
+            "zh-Hans": "%d 分钟", "zh-Hant": "%d 分鐘", "en": "%d min"],
+
+        "focus.sec.auto": [
+            "zh-Hans": "自动开始", "zh-Hant": "自動開始", "en": "Auto start"],
+
+        "focus.autoBreak": [
+            "zh-Hans": "专注结束后自动开始休息", "zh-Hant": "專注結束後自動開始休息",
+            "en": "Start breaks automatically"],
+
+        "focus.autoFocus": [
+            "zh-Hans": "休息结束后自动开始下一轮专注", "zh-Hant": "休息結束後自動開始下一輪專注",
+            "en": "Start next focus automatically"],
+
+        "focus.keepAwake": [
+            "zh-Hans": "专注时保持屏幕常亮", "zh-Hant": "專注時保持螢幕常亮",
+            "en": "Keep the screen awake while focusing"],
 
         "sec.menubar": [
             "zh-Hans": "菜单栏", "zh-Hant": "選單列", "en": "Menu Bar", "ja": "メニューバー",

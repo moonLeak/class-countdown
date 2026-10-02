@@ -109,6 +109,13 @@ final class SettingsStore: ObservableObject {
         static let menuBarStyle      = "menubar.style"
         static let badgeProgress     = "menubar.badgeProgress"
         static let showNextWhenIdle  = "menubar.showNextWhenIdle"
+        static let focusMinutes      = "focus.focusMinutes"
+        static let shortBreakMinutes = "focus.shortBreakMinutes"
+        static let longBreakMinutes  = "focus.longBreakMinutes"
+        static let autoStartBreak    = "focus.autoStartBreak"
+        static let autoStartFocus    = "focus.autoStartFocus"
+        static let keepAwake         = "focus.keepAwake"
+        static let flowCardSlot      = "cards.flowSlot"
     }
 
     /// 存“排除”而不是“勾选”，这样新加的日历默认参与倒计时
@@ -161,6 +168,42 @@ final class SettingsStore: ObservableObject {
         didSet { defaults.set(showNextWhenIdle, forKey: Key.showNextWhenIdle) }
     }
 
+    @Published var focusMinutes: Int {
+        didSet { defaults.set(focusMinutes, forKey: Key.focusMinutes) }
+    }
+    @Published var shortBreakMinutes: Int {
+        didSet { defaults.set(shortBreakMinutes, forKey: Key.shortBreakMinutes) }
+    }
+    @Published var longBreakMinutes: Int {
+        didSet { defaults.set(longBreakMinutes, forKey: Key.longBreakMinutes) }
+    }
+    /// 专注结束后自动开始休息
+    @Published var autoStartBreak: Bool {
+        didSet { defaults.set(autoStartBreak, forKey: Key.autoStartBreak) }
+    }
+    /// 休息结束后自动开始下一轮专注
+    @Published var autoStartFocus: Bool {
+        didSet { defaults.set(autoStartFocus, forKey: Key.autoStartFocus) }
+    }
+    /// 专注进行中保持屏幕常亮
+    @Published var keepAwake: Bool {
+        didSet { defaults.set(keepAwake, forKey: Key.keepAwake) }
+    }
+    /// Flow 卡在卡叠里的位置，-1 表示默认的最底层。
+    /// 日程卡的顺序由结束时间决定，不能手动排，所以只记 Flow 卡的位置。
+    @Published var flowCardSlot: Int {
+        didSet { defaults.set(flowCardSlot, forKey: Key.flowCardSlot) }
+    }
+
+    var focusConfig: FocusConfig {
+        FocusConfig(focusDuration: TimeInterval(focusMinutes) * 60,
+                    shortBreakDuration: TimeInterval(shortBreakMinutes) * 60,
+                    longBreakDuration: TimeInterval(longBreakMinutes) * 60,
+                    cyclesPerRound: 4,
+                    autoStartBreak: autoStartBreak,
+                    autoStartFocus: autoStartFocus)
+    }
+
     /// 真正写进菜单栏的那个字符串
     var separator: String {
         if let g = separatorPreset.glyph { return g }
@@ -182,7 +225,14 @@ final class SettingsStore: ObservableObject {
             Key.customSeparator: "/",
             Key.menuBarStyle: MenuBarStyle.ring.rawValue,
             Key.badgeProgress: true,
-            Key.showNextWhenIdle: true
+            Key.showNextWhenIdle: true,
+            Key.focusMinutes: 25,
+            Key.shortBreakMinutes: 5,
+            Key.longBreakMinutes: 15,
+            Key.autoStartBreak: false,
+            Key.autoStartFocus: false,
+            Key.keepAwake: true,
+            Key.flowCardSlot: -1
         ])
         self.excludedCalendarIDs = Set(defaults.stringArray(forKey: Key.excludedCalendars) ?? [])
         self.includeAllDay      = defaults.bool(forKey: Key.includeAllDay)
@@ -198,6 +248,13 @@ final class SettingsStore: ObservableObject {
                                   ?? .ring
         self.badgeProgress      = defaults.bool(forKey: Key.badgeProgress)
         self.showNextWhenIdle   = defaults.bool(forKey: Key.showNextWhenIdle)
+        self.focusMinutes       = defaults.integer(forKey: Key.focusMinutes)
+        self.shortBreakMinutes  = defaults.integer(forKey: Key.shortBreakMinutes)
+        self.longBreakMinutes   = defaults.integer(forKey: Key.longBreakMinutes)
+        self.autoStartBreak     = defaults.bool(forKey: Key.autoStartBreak)
+        self.autoStartFocus     = defaults.bool(forKey: Key.autoStartFocus)
+        self.keepAwake          = defaults.bool(forKey: Key.keepAwake)
+        self.flowCardSlot       = defaults.integer(forKey: Key.flowCardSlot)
         // didSet 在 init 里不触发，这里补一次
         L10n.shared.apply(self.language)
     }

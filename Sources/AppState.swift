@@ -12,6 +12,7 @@ final class AppState: ObservableObject {
     let calendar = CalendarService()
     let tick = TickEngine()
     lazy var model = ScheduleModel(calendarService: calendar, settings: settings, tick: tick)
+    lazy var focus = FocusController(settings: settings, tick: tick)
 
     private init() {}
 
@@ -19,5 +20,6 @@ final class AppState: ObservableObject {
         tick.start()
         model.start()
         calendar.start()
+        focus.start()
     }
 }

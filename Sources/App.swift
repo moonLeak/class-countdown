@@ -33,12 +33,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panelController.install()
     }
 
+    func applicationWillTerminate(_ notification: Notification) {
+        AppState.shared.focus.persistOnQuit()
+    }
+
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool { true }
 }
 
 extension Notification.Name {
     /// 面板尺寸要跟着内容变，靠这个通知从 SwiftUI 那侧推过来
     static let panelContentResized = Notification.Name("panelContentResized")
+    /// 卡片上的统计图标或浮窗里的统计入口
+    static let openStatsRequested = Notification.Name("openStatsRequested")
     /// 右键菜单里点了设置
     static let openSettingsRequested = Notification.Name("openSettingsRequested")
     /// 内容层请求收回面板（例如跳去日历之后）

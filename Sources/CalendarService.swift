@@ -56,7 +56,63 @@ final class CalendarService: ObservableObject {
     // 不写 deinit：deinit 是非隔离上下文，触碰 @MainActor 属性在不同 Swift 版本
     // 下从警告到报错不等。这个对象随 App 活到进程结束，没有回收时机。
 
+    /// 开发用：启动参数 --mock-events <json 路径> 时，不读系统日历，也不请求权限，
+    /// 直接用 JSON 里描述的日程。见 DevData/mock-events.json 与 dev.sh。
+    private static var mockPath: String? {
+        let args = CommandLine.arguments
+        guard let i = args.firstIndex(of: "--mock-events"), i + 1 < args.count else { return nil }
+        return args[i + 1]
+    }
+
+    private func loadMock(_ path: String) {
+        guard let data = FileManager.default.contents(atPath: path),
+              let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else { return }
+        let anchor = Date()
+
+        var made: [String: EKCalendar] = [:]
+        for c in (root["calendars"] as? [[String: Any]]) ?? [] {
+            guard let name = c["name"] as? String else { continue }
+            let cal = EKCalendar(for: .event, eventStore: store)
+            cal.title = name
+            cal.cgColor = Self.cgColor(hex: c["color"] as? String)
+            made[name] = cal
+        }
+
+        var list: [EKEvent] = []
+        for e in (root["events"] as? [[String: Any]]) ?? [] {
+            guard let title = e["title"] as? String else { continue }
+            let ev = EKEvent(eventStore: store)
+            ev.title = title
+            ev.calendar = made[e["calendar"] as? String ?? ""]
+            let start = (e["startMinutes"] as? Double) ?? 0
+            let length = (e["durationMinutes"] as? Double) ?? 60
+            ev.startDate = anchor.addingTimeInterval(start * 60)
+            ev.endDate = anchor.addingTimeInterval((start + length) * 60)
+            ev.isAllDay = (e["allDay"] as? Bool) ?? false
+            list.append(ev)
+        }
+        calendars = made.values.sorted { $0.title < $1.title }
+        events = list.sorted { ($0.startDate ?? .distantPast) < ($1.startDate ?? .distantPast) }
+        access = .granted
+    }
+
+    private static func cgColor(hex: String?) -> CGColor {
+        guard var h = hex?.trimmingCharacters(in: CharacterSet(charactersIn: "#")),
+              h.count == 6, let v = UInt32(h, radix: 16) else {
+            return CGColor(red: 0.04, green: 0.52, blue: 1, alpha: 1)
+        }
+        h = ""
+        return CGColor(red: CGFloat((v >> 16) & 0xFF) / 255,
+                       green: CGFloat((v >> 8) & 0xFF) / 255,
+                       blue: CGFloat(v & 0xFF) / 255, alpha: 1)
+    }
+
     func requestAccess() {
+        if let path = Self.mockPath {
+            loadMock(path)
+            return
+        }
         store.requestFullAccessToEvents { [weak self] granted, _ in
             guard let self else { return }
             Task { @MainActor in
@@ -67,7 +123,8 @@ final class CalendarService: ObservableObject {
     }
 
     func reload() {
-        guard access == .granted else { return }
+        // 模拟模式下日程是固定的，不能被定时重拉冲掉
+        guard Self.mockPath == nil, access == .granted else { return }
 
         calendars = store.calendars(for: .event)
             .sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }

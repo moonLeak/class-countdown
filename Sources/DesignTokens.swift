@@ -29,6 +29,32 @@ enum DS {
     /// 内容区最大宽，窗口更宽时居中
     static let settingsContentMaxW: CGFloat = 560
 
+    // MARK: 统计窗口
+    static let statsW: CGFloat = 560
+    static let statsH: CGFloat = 660
+
+    // MARK: Flow 卡底行
+    /// 底行中心线距卡片底边，按钮、四个点、图标共用
+    static let rowCenter: CGFloat = 28
+    /// 按钮距卡片右、下边的距离 = 圆角 28 - 按钮半径 16
+    static let insetConcentric: CGFloat = 12
+    static let buttonW: CGFloat = 92
+    static let skipW: CGFloat = 64
+    static let buttonH: CGFloat = 32
+    static let buttonGap: CGFloat = 8
+    static let dot: CGFloat = 8
+    static let dotCurrent: CGFloat = 26
+    static let dotGap: CGFloat = 6
+    static let dotDone: Double = 0.85
+    static let dotNow: Double = 0.35
+    static let dotTodo: Double = 0.22
+    static let iconHit: CGFloat = 28
+    /// 点组与图标、图标与图标之间的视觉间距
+    static let iconGap: CGFloat = 13
+    static let fButton: CGFloat = 12
+    static let primaryAlpha: Double = 0.55
+    static let ghostAlpha: Double = 0.12
+
     // MARK: 菜单栏徽标
     static let badgeH: CGFloat = 20
     static let badgeRadius: CGFloat = 6

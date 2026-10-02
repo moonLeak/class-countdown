@@ -11,12 +11,15 @@ struct InteractionArea: NSViewRepresentable {
     var onForceClick: () -> Void
     /// 按压深度反馈：进入二段时回 true，松手回 false
     var onPressing: (Bool) -> Void
+    /// 垂直拖动：位移（向下为正）与是否结束。为 nil 时不响应拖动。
+    var onDrag: ((CGFloat, Bool) -> Void)? = nil
 
     func makeNSView(context: Context) -> PressureView {
         let v = PressureView()
         v.onClick = onClick
         v.onForce = onForceClick
         v.onPressing = onPressing
+        v.onDrag = onDrag
         return v
     }
 
@@ -24,6 +27,7 @@ struct InteractionArea: NSViewRepresentable {
         v.onClick = onClick
         v.onForce = onForceClick
         v.onPressing = onPressing
+        v.onDrag = onDrag
     }
 }
 
@@ -32,8 +36,11 @@ final class PressureView: NSView {
     var onClick: () -> Void = {}
     var onForce: () -> Void = {}
     var onPressing: (Bool) -> Void = { _ in }
+    var onDrag: ((CGFloat, Bool) -> Void)?
 
     private var forcedThisDrag = false
+    private var dragStartY: CGFloat = 0
+    private var dragging = false
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -47,9 +54,25 @@ final class PressureView: NSView {
 
     override func mouseDown(with event: NSEvent) {
         forcedThisDrag = false
+        dragging = false
+        dragStartY = event.locationInWindow.y
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        guard let onDrag, !forcedThisDrag else { return }
+        // 窗口坐标 y 向上，界面坐标向下，取反
+        let dy = dragStartY - event.locationInWindow.y
+        if !dragging, abs(dy) > 4 { dragging = true }
+        if dragging { onDrag(dy, false) }
     }
 
     override func mouseUp(with event: NSEvent) {
+        if dragging {
+            dragging = false
+            onPressing(false)
+            onDrag?(dragStartY - event.locationInWindow.y, true)
+            return
+        }
         onPressing(false)
         // 已经当成重按处理过就不再当单击，否则一次操作触发两件事
         guard !forcedThisDrag else { return }

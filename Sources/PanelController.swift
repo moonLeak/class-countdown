@@ -26,6 +26,7 @@ final class PanelController: NSObject {
     private var isOpen = false
 
     private let state = AppState.shared
+    private lazy var statsController = StatsWindowController()
     private lazy var settingsController = SettingsWindowController(
         settings: state.settings, calendarService: state.calendar)
 
@@ -61,6 +62,10 @@ final class PanelController: NSObject {
 
         NotificationCenter.default.publisher(for: .openSettingsRequested)
             .sink { [weak self] _ in Task { @MainActor in self?.openSettings() } }
+            .store(in: &bag)
+
+        NotificationCenter.default.publisher(for: .openStatsRequested)
+            .sink { [weak self] _ in Task { @MainActor in self?.statsController.show() } }
             .store(in: &bag)
 
         // 展开收起会改变内容高度，面板得跟着变
@@ -174,6 +179,8 @@ final class PanelController: NSObject {
             model: state.model,
             tick: state.tick,
             calendarService: state.calendar,
+            focus: state.focus,
+            settings: state.settings,
             presentation: presentation
         ))
         // 不碰 host 的尺寸策略，也不碰它的 layer。

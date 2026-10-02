@@ -15,7 +15,7 @@ struct SettingsRoot: View {
             switch navigation.tab {
             case .general:   GeneralTab(settings: settings)
             case .calendars: CalendarsTab(settings: settings, calendarService: calendarService)
-            case .focus:     FocusTab()
+            case .focus:     FocusTab(settings: settings)
             case .about:     AboutTab()
             }
         }
@@ -124,12 +124,34 @@ private struct CalendarsTab: View {
     }
 }
 
-/// 专注页在 FocusEngine 接上之前先放占位
 private struct FocusTab: View {
+    @ObservedObject var settings: SettingsStore
+
     var body: some View {
-        Text(L("focus.placeholder"))
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        Form {
+            Section(L("focus.sec.durations")) {
+                Stepper(value: $settings.focusMinutes, in: 1...120) {
+                    LabeledContent(L("focus.focusMinutes"), value: L("unit.minutes", settings.focusMinutes))
+                }
+                Stepper(value: $settings.shortBreakMinutes, in: 1...60) {
+                    LabeledContent(L("focus.shortBreak"), value: L("unit.minutes", settings.shortBreakMinutes))
+                }
+                Stepper(value: $settings.longBreakMinutes, in: 1...60) {
+                    LabeledContent(L("focus.longBreak"), value: L("unit.minutes", settings.longBreakMinutes))
+                }
+            }
+
+            Section(L("focus.sec.auto")) {
+                Toggle(L("focus.autoBreak"), isOn: $settings.autoStartBreak)
+                Toggle(L("focus.autoFocus"), isOn: $settings.autoStartFocus)
+            }
+
+            Section {
+                Toggle(L("focus.keepAwake"), isOn: $settings.keepAwake)
+            }
+        }
+        .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
     }
 }
 
