@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>v7.8 设置窗口 · 正规可缩放</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text',system-ui,sans-serif;-webkit-font-smoothing:antialiased;user-select:none}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 14px 5px;border-radius:10px;cursor:pointer;transition:background .15s ease,color .15s ease;min-width:44px}
+.tab:hover{background:rgba(255,255,255,0.06)}
+.pill{cursor:pointer;transition:filter .15s ease}
+.pill:hover{filter:brightness(1.15)}
+.opt{padding:6px 12px;font-size:12px;color:#fff;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.opt:hover{background:rgba(255,255,255,0.14)}
+.sb{width:26px;height:22px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.85);cursor:pointer}
+.sb:hover{background:rgba(255,255,255,0.14)}
+.scroll{overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.25) transparent}
+</style>
+</helmet>
+<div style="width: 780px; height: 720px; box-sizing: border-box; background: radial-gradient(120% 140% at 18% 8%, #3a4a6b 0%, #222a3d 42%, #14161f 100%); position: relative; overflow: hidden;">
+
+  <div onClick="{{closeMenu}}" style="{{winStyle}}">
+
+    <!-- 标题栏 + 工具栏标签 -->
+    <div style="position: absolute; left: 0; right: 0; top: 0; height: 84px;">
+      <div style="position: absolute; left: 16px; top: 15px; display: flex; gap: 8px;">
+        <div style="width: 12px; height: 12px; border-radius: 6px; background: #FF5F57;"></div>
+        <div style="width: 12px; height: 12px; border-radius: 6px; background: #FEBC2E;"></div>
+        <div style="width: 12px; height: 12px; border-radius: 6px; background: #28C840;"></div>
+      </div>
+      <div style="position: absolute; left: 0; right: 0; top: 11px; text-align: center; font-size: 13px; font-weight: 590; color: rgba(255,255,255,0.78);">{{winTitle}}</div>
+      <div style="position: absolute; left: 0; right: 0; top: 34px; display: flex; justify-content: center; gap: 4px;">
+        <div class="tab" onClick="{{tabGeneral}}" style="{{tabGeneralStyle}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg><span style="font-size: 10.5px; font-weight: 500;">通用</span></div>
+        <div class="tab" onClick="{{tabCalendar}}" style="{{tabCalendarStyle}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg><span style="font-size: 10.5px; font-weight: 500;">日历</span></div>
+        <div class="tab" onClick="{{tabFocus}}" style="{{tabFocusStyle}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle></svg><span style="font-size: 10.5px; font-weight: 500;">专注</span></div>
+        <div class="tab" onClick="{{tabAbout}}" style="{{tabAboutStyle}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg><span style="font-size: 10.5px; font-weight: 500;">关于</span></div>
+      </div>
+      <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 0.5px; background: rgba(255,255,255,0.10);"></div>
+    </div>
+
+    <!-- 内容区：随窗口大小伸缩，内容多时滚动 -->
+    <div class="scroll" style="position: absolute; left: 0; right: 0; top: 85px; bottom: 0; padding: 18px 24px 28px;">
+      <div style="max-width: 560px; margin: 0 auto;">
+      <sc-for list="{{items}}" as="r" hint-placeholder-count="6">
+        <div>
+          <div style="display: {{r.hdrDisp}}; font-size: 11px; font-weight: 590; color: rgba(255,255,255,0.45); letter-spacing: 0.02em; padding: 4px 6px 6px;">{{r.text}}</div>
+          <div style="display: {{r.footDisp}}; font-size: 11px; line-height: 1.5; color: rgba(255,255,255,0.45); padding: 0 6px 16px;">{{r.text}}</div>
+          <div style="display: {{r.aboutDisp}}; flex-direction: column; align-items: center; padding: 14px 0 22px; gap: 6px;">
+            <div style="width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(160deg, rgba(76,141,255,0.9), rgba(48,209,88,0.85)); box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 8px 20px rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center;"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5" opacity="0.4"></circle><path d="M12 3.5a8.5 8.5 0 0 1 8.2 6.3"></path></svg></div>
+            <div style="font-size: 15px; font-weight: 600; color: #fff; margin-top: 4px;">ClassCountdown</div>
+            <div style="font-size: 12px; color: rgba(255,255,255,0.55);">版本 1.1.0</div>
+          </div>
+
+          <!-- 行 -->
+          <div style="{{r.rowStyle}}">
+            <div style="display: flex; align-items: center; gap: 12px; padding: 0 14px; min-height: 40px;">
+              <div style="display: {{r.dotDisp}}; width: 10px; height: 10px; border-radius: 5px; flex: none; background: {{r.dotColor}};"></div>
+              <div style="flex-grow: 1; padding: 8px 0;">
+                <div style="font-size: 13px; color: {{r.labelColor}}; letter-spacing: -0.01em;">{{r.label}}</div>
+                <div style="display: {{r.subDisp}}; font-size: 11px; line-height: 1.4; color: rgba(255,255,255,0.45); margin-top: 2px;">{{r.sub}}</div>
+              </div>
+
+              <div class="pill" onClick="{{r.tgClick}}" style="display: {{r.tgDisp}}; width: 38px; height: 22px; border-radius: 11px; flex: none; position: relative; background: {{r.tgBg}}; box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.35), inset 0 0 0 0.5px rgba(255,255,255,0.18); transition: background .2s ease;">
+                <div style="position: absolute; top: 2px; left: {{r.knobLeft}}; width: 18px; height: 18px; border-radius: 9px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3); transition: left .2s ease;"></div>
+              </div>
+
+              <div style="display: {{r.mnDisp}}; position: relative; flex: none;">
+                <div class="pill" onClick="{{r.mnClick}}" style="font-size: 12px; font-weight: 500; color: #fff; background: rgba(255,255,255,0.16); box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.3), inset 0 0 0 0.5px rgba(255,255,255,0.18); padding: 4px 10px; border-radius: 999px; display: flex; align-items: center; gap: 7px; white-space: nowrap;">{{r.mnText}}<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+                <div style="display: {{r.popDisp}}; position: absolute; right: 0; top: 30px; z-index: 50; min-width: 150px; padding: 4px 0; border-radius: 12px; background: rgba(52,58,74,0.96); backdrop-filter: blur(24px); box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.18), 0 12px 30px rgba(0,0,0,0.5); flex-direction: column;">
+                  <div class="opt" onClick="{{r.o1click}}" style="display: {{r.o1disp}};"><span style="width: 12px; opacity: {{r.o1sel}};">✓</span>{{r.o1}}</div>
+                  <div class="opt" onClick="{{r.o2click}}" style="display: {{r.o2disp}};"><span style="width: 12px; opacity: {{r.o2sel}};">✓</span>{{r.o2}}</div>
+                  <div class="opt" onClick="{{r.o3click}}" style="display: {{r.o3disp}};"><span style="width: 12px; opacity: {{r.o3sel}};">✓</span>{{r.o3}}</div>
+                  <div class="opt" onClick="{{r.o4click}}" style="display: {{r.o4disp}};"><span style="width: 12px; opacity: {{r.o4sel}};">✓</span>{{r.o4}}</div>
+                </div>
+              </div>
+
+              <div style="display: {{r.stDisp}}; align-items: center; gap: 8px; flex: none;">
+                <div style="font-size: 13px; color: #fff; font-variant-numeric: tabular-nums; min-width: 66px; text-align: right;">{{r.stVal}}</div>
+                <div style="display: flex; border-radius: 7px; overflow: hidden; background: rgba(255,255,255,0.12); box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.16);">
+                  <div class="sb" onClick="{{r.stMinus}}">−</div>
+                  <div style="width: 0.5px; background: rgba(255,255,255,0.18);"></div>
+                  <div class="sb" onClick="{{r.stPlus}}">+</div>
+                </div>
+              </div>
+
+              <div style="display: {{r.segDisp}}; flex: none; padding: 2px; border-radius: 9px; background: rgba(255,255,255,0.10); box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.10);">
+                <div class="pill" onClick="{{r.s1click}}" style="{{r.s1style}}">{{r.s1}}</div>
+                <div class="pill" onClick="{{r.s2click}}" style="{{r.s2style}}">{{r.s2}}</div>
+              </div>
+
+              <div style="display: {{r.valDisp}}; font-size: 13px; color: rgba(255,255,255,0.55); flex: none;">{{r.valText}}</div>
+
+              <div class="pill" onClick="{{r.btnClick}}" style="display: {{r.btnDisp}}; font-size: 12px; font-weight: 500; color: #FF453A; background: rgba(255,69,58,0.16); box-shadow: inset 0 0 0 0.5px rgba(255,69,58,0.35); padding: 4px 14px; border-radius: 999px; flex: none;">退出</div>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+      </div>
+    </div>
+
+    <!-- 缩放手柄 -->
+    <div onMouseDown="{{resizeDown}}" style="position: absolute; right: 0; bottom: 0; width: 28px; height: 28px; cursor: nwse-resize; z-index: 80;">
+      <svg style="position: absolute; right: 6px; bottom: 6px;" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.2" stroke-linecap="round"><path d="M11 1L1 11M11 6L6 11"></path></svg>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 30px; top: 0; height: 30px; display: flex; align-items: center; font-size: 11px; color: rgba(255,255,255,0.45);">{{sizeLabel}}　拖右下角可以缩放，内容多时在窗口内滚动</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":780,"height":720}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      tab: 'general', w: 540, h: 600, menu: null,
+      t: { launch: true, nextIdle: true, badgeProgress: true, allDay: false, c1: true, c2: true, c3: false, c4: true, autoBreak: false, autoFocus: false, keepAwake: true, writeCal: true },
+      v: { lang: '跟随系统', mbContent: '名称与剩余时间', mbStyle: '圆环', warn: '剩余 5 分钟', calTarget: '新建“专注”日历', focusMin: 25, shortMin: 5, longMin: 15 }
+    };
+  }
+
+  rowsFor(tab) {
+    const s = this.state;
+    const R = [];
+    const hd = (text) => R.push({ t: 'hd', text });
+    const ft = (text) => R.push({ t: 'ft', text });
+    const tg = (key, label, sub) => R.push({ t: 'tg', key, label, sub });
+    const mn = (key, label, options, sub) => R.push({ t: 'mn', key, label, options, sub });
+    const st = (key, label, unit, min, max, step) => R.push({ t: 'st', key, label, unit, min, max, step });
+    if (tab === 'general') {
+      hd('通用');
+      mn('lang', '界面语言', ['跟随系统', '简体中文', 'English']);
+      tg('launch', '登录时打开');
+      hd('菜单栏');
+      R.push({ t: 'sg', key: 'mbStyle', label: '外观样式', options: ['圆环', '徽标'] });
+      mn('mbContent', '显示内容', ['仅图标', '仅剩余时间', '名称与剩余时间']);
+      if (s.v.mbStyle === '徽标') tg('badgeProgress', '徽标显示进度底色', '徽标的底色随进度从左向右填充，和卡片一致');
+      tg('nextIdle', '空闲时显示下一个日程', '没有进行中的日程和专注时，菜单栏显示下一个日程的倒计时');
+    } else if (tab === 'calendar') {
+      hd('日历来源');
+      R.push({ t: 'cal', key: 'c1', label: '个人', color: '#4C8DFF' });
+      R.push({ t: 'cal', key: 'c2', label: '课程表', color: '#FF9F0A' });
+      R.push({ t: 'cal', key: 'c3', label: '工作', color: '#BF5AF2' });
+      R.push({ t: 'cal', key: 'c4', label: '节假日', color: '#30D158' });
+      ft('只读取勾选的日历。专注记录写入哪个日历，在“专注”里设置。');
+      hd('倒计时');
+      tg('allDay', '包含全天事件');
+      mn('warn', '临近结束警示', ['不提醒', '剩余 3 分钟', '剩余 5 分钟', '剩余 10 分钟']);
+    } else if (tab === 'focus') {
+      hd('时长');
+      st('focusMin', '专注', '分钟', 5, 120, 5);
+      st('shortMin', '短休息', '分钟', 1, 30, 1);
+      st('longMin', '长休息', '分钟', 5, 60, 5);
+      R.push({ t: 'vl', label: '每一轮', valText: '4 节专注' });
+      hd('自动开始');
+      tg('autoBreak', '专注结束后自动开始休息');
+      tg('autoFocus', '休息结束后自动开始下一轮');
+      hd('专注时');
+      tg('keepAwake', '保持屏幕常亮', '专注计时进行中，不让屏幕自动熄灭');
+      hd('记录');
+      tg('writeCal', '把专注写入日历', '每一段专注写成一个日历事件，显示为“空闲”，不会让你在日历里变成忙碌');
+      if (s.t.writeCal) mn('calTarget', '写入的日历', ['新建“专注”日历', '个人', '课程表']);
+      ft('合上屏幕超过 15 分钟时，这 15 分钟不计入，专注在合盖那一刻结束。');
+    } else {
+      R.push({ t: 'ab' });
+      hd('其他');
+      R.push({ t: 'bt', label: '退出 ClassCountdown' });
+    }
+    // 分组：连续的行（非标题、非脚注）为一组，首尾给圆角
+    const isRow = (r) => !(r.t === 'hd' || r.t === 'ft' || r.t === 'ab');
+    R.forEach((r, i) => {
+      r.first = isRow(r) && !(i > 0 && isRow(R[i - 1]));
+      r.last = isRow(r) && !(i < R.length - 1 && isRow(R[i + 1]));
+    });
+    return R;
+  }
+
+  renderVals() {
+    const s = this.state;
+    const none = 'none';
+    const set = (patch) => this.setState(patch);
+    const items = this.rowsFor(s.tab).map((r) => {
+      const isRow = !(r.t === 'hd' || r.t === 'ft' || r.t === 'ab');
+      const o = r.options || [];
+      const cur = r.key ? (r.t === 'tg' || r.t === 'cal' ? null : s.v[r.key]) : null;
+      const menuOpen = s.menu === r.key && r.t === 'mn';
+      const radius = (r.first ? 'border-top-left-radius: 14px; border-top-right-radius: 14px; ' : '') + (r.last ? 'border-bottom-left-radius: 14px; border-bottom-right-radius: 14px; ' : '');
+      const rowStyle = isRow
+        ? 'background: rgba(255,255,255,0.07); box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.10); ' + radius + (r.last ? 'margin-bottom: 18px; ' : '') + (r.first ? '' : 'border-top: 0.5px solid rgba(255,255,255,0.10); ') + 'position: relative; ' + (menuOpen ? 'z-index: 20;' : '')
+        : 'display: none;';
+      const tgOn = (r.t === 'tg' || r.t === 'cal') ? !!s.t[r.key] : false;
+      const mkOpt = (i) => ({
+        ['o' + (i + 1)]: o[i] || '',
+        ['o' + (i + 1) + 'disp']: o[i] !== undefined ? 'flex' : none,
+        ['o' + (i + 1) + 'sel']: o[i] === cur ? '1' : '0',
+        ['o' + (i + 1) + 'click']: (e) => { e.stopPropagation(); set({ v: Object.assign({}, s.v, { [r.key]: o[i] }), menu: null }); }
+      });
+      const segStyle = (i) => {
+        const on = o[i] === cur;
+        return 'font-size: 12px; font-weight: 590; padding: 3px 14px; border-radius: 7px; color: ' + (on ? '#fff' : 'rgba(255,255,255,0.55)') + '; background: ' + (on ? 'rgba(255,255,255,0.20)' : 'transparent') + ';' + (on ? ' box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.35);' : '');
+      };
+      const step = (d) => (e) => {
+        e.stopPropagation();
+        const nv = Math.max(r.min, Math.min(r.max, s.v[r.key] + d * r.step));
+        set({ v: Object.assign({}, s.v, { [r.key]: nv }) });
+      };
+      return Object.assign({
+        text: r.text || '',
+        hdrDisp: r.t === 'hd' ? 'block' : none,
+        footDisp: r.t === 'ft' ? 'block' : none,
+        aboutDisp: r.t === 'ab' ? 'flex' : none,
+        rowStyle: rowStyle,
+        label: r.label || '',
+        labelColor: r.t === 'bt' ? '#fff' : '#fff',
+        sub: r.sub || '', subDisp: r.sub ? 'block' : none,
+        dotDisp: r.t === 'cal' ? 'block' : none, dotColor: r.color || 'transparent',
+        tgDisp: (r.t === 'tg' || r.t === 'cal') ? 'block' : none,
+        tgBg: tgOn ? '#30D158' : 'rgba(255,255,255,0.16)',
+        knobLeft: tgOn ? '18px' : '2px',
+        tgClick: (e) => { e.stopPropagation(); set({ t: Object.assign({}, s.t, { [r.key]: !s.t[r.key] }), menu: null }); },
+        mnDisp: r.t === 'mn' ? 'block' : none,
+        mnText: r.t === 'mn' ? s.v[r.key] : '',
+        mnClick: (e) => { e.stopPropagation(); set({ menu: menuOpen ? null : r.key }); },
+        popDisp: menuOpen ? 'flex' : none,
+        stDisp: r.t === 'st' ? 'flex' : none,
+        stVal: r.t === 'st' ? s.v[r.key] + ' ' + r.unit : '',
+        stMinus: r.t === 'st' ? step(-1) : null, stPlus: r.t === 'st' ? step(1) : null,
+        segDisp: r.t === 'sg' ? 'flex' : none,
+        s1: o[0] || '', s2: o[1] || '', s1style: segStyle(0), s2style: segStyle(1),
+        s1click: (e) => { e.stopPropagation(); set({ v: Object.assign({}, s.v, { [r.key]: o[0] }) }); },
+        s2click: (e) => { e.stopPropagation(); set({ v: Object.assign({}, s.v, { [r.key]: o[1] }) }); },
+        valDisp: r.t === 'vl' ? 'block' : none, valText: r.valText || '',
+        btnDisp: r.t === 'bt' ? 'block' : none,
+        btnClick: (e) => { e.stopPropagation(); }
+      }, mkOpt(0), mkOpt(1), mkOpt(2), mkOpt(3));
+    });
+
+    const titles = { general: '通用', calendar: '日历', focus: '专注', about: '关于' };
+    const tabStyle = (k) => 'color: ' + (s.tab === k ? '#ffffff' : 'rgba(255,255,255,0.58)') + '; background: ' + (s.tab === k ? 'rgba(255,255,255,0.14)' : 'transparent') + ';';
+    const go = (k) => () => set({ tab: k, menu: null });
+    const winStyle = [
+      'position: absolute', 'left: 30px', 'top: 30px',
+      'width: ' + s.w + 'px', 'height: ' + s.h + 'px', 'box-sizing: border-box',
+      'border-radius: 26px', 'overflow: hidden',
+      'background: rgba(34,38,52,0.80)',
+      'backdrop-filter: blur(30px) saturate(180%)', '-webkit-backdrop-filter: blur(30px) saturate(180%)',
+      'box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), inset 0 0 0 0.5px rgba(255,255,255,0.16), 0 24px 60px rgba(0,0,0,0.5)'
+    ].join('; ');
+
+    return {
+      items: items,
+      winStyle: winStyle,
+      winTitle: titles[s.tab],
+      sizeLabel: s.w + ' × ' + s.h,
+      tabGeneral: go('general'), tabCalendar: go('calendar'), tabFocus: go('focus'), tabAbout: go('about'),
+      tabGeneralStyle: tabStyle('general'), tabCalendarStyle: tabStyle('calendar'), tabFocusStyle: tabStyle('focus'), tabAboutStyle: tabStyle('about'),
+      closeMenu: () => { if (s.menu) set({ menu: null }); },
+      resizeDown: (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const sx = e.clientX, sy = e.clientY, w0 = this.state.w, h0 = this.state.h;
+        const move = (ev) => {
+          const w = Math.max(420, Math.min(720, w0 + ev.clientX - sx));
+          const h = Math.max(380, Math.min(670, h0 + ev.clientY - sy));
+          this.setState({ w: w, h: h });
+        };
+        const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); };
+        window.addEventListener('mousemove', move);
+        window.addEventListener('mouseup', up);
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

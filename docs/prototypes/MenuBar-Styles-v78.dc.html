@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>v7.8 菜单栏 · 圆环与徽标两种样式</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text',system-ui,sans-serif;-webkit-font-smoothing:antialiased;user-select:none}
+.chip{padding:5px 12px;border-radius:14px;font-size:12px;font-weight:500;cursor:pointer;color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.08);box-shadow:inset 0 0 0 0.5px rgba(255,255,255,0.14);transition:background .15s ease}
+.chip:hover{background:rgba(255,255,255,0.16)}
+.fill{transition:width .4s ease}
+</style>
+</helmet>
+<div style="width: 760px; height: 560px; box-sizing: border-box; background: radial-gradient(120% 140% at 18% 8%, #3a4a6b 0%, #222a3d 42%, #14161f 100%); position: relative; overflow: hidden;">
+
+  <div style="position: absolute; left: 30px; right: 30px; top: 24px;">
+    <div style="font-size: 13px; font-weight: 600; color: #fff;">菜单栏 · 圆环 与 徽标</div>
+    <div style="font-size: 11px; color: rgba(255,255,255,0.52); margin-top: 3px;">圆环是系统模板图标（随明暗自动着色）；徽标是带底色的圆角框，底色按状态着色，可选随进度从左向右填充。两种样式在设置的“菜单栏 / 外观样式”里切换。</div>
+  </div>
+
+  <sc-for list="{{bars}}" as="m" hint-placeholder-count="2">
+    <div style="position: absolute; left: 30px; right: 30px; top: {{m.top}};">
+      <div style="font-size: 11px; color: rgba(255,255,255,0.52); margin-bottom: 6px;">{{m.name}}</div>
+      <div style="height: 32px; border-radius: 9px; background: {{m.bg}}; display: flex; align-items: center; justify-content: flex-end; gap: 16px; padding: 0 14px; color: {{m.fg}}; font-size: 13px; font-variant-numeric: tabular-nums; box-shadow: inset 0 0 0 0.5px {{m.edge}};">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.85;"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.85;"><path d="M5 12a10 10 0 0 1 14 0M8 15a6 6 0 0 1 8 0M12 19h.01"></path></svg>
+
+        <!-- 我们的项目：圆环样式 -->
+        <span style="display: {{m.ringDisp}}; align-items: center; gap: 5px;">
+          <svg width="16" height="16" viewBox="0 0 16 16" style="transform: rotate(-90deg);"><circle cx="8" cy="8" r="6.9" fill="none" style="stroke: {{m.track}}; stroke-width: 2.2;"></circle><circle cx="8" cy="8" r="6.9" fill="none" style="stroke: {{m.fg}}; stroke-width: 2.2; stroke-linecap: round; stroke-dasharray: {{dash}} 43.35;"></circle></svg>
+          <span style="display: {{timeDisp}};">{{time}}</span><span style="display: {{titleDisp}};">{{title}}</span>
+        </span>
+
+        <!-- 我们的项目：徽标样式 -->
+        <span style="display: {{m.badgeDisp}}; align-items: center; gap: 6px;">
+          <span style="position: relative; height: 20px; padding: 0 8px; border-radius: 6px; overflow: hidden; display: flex; align-items: center; background: {{m.badgeBase}}; box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.18);">
+            <span class="fill" style="position: absolute; left: 0; top: 0; bottom: 0; width: {{fillW}}; background: {{m.badgeFill}};"></span>
+            <span style="position: relative; color: #fff; font-size: 13px; font-weight: 500; text-shadow: 0 0.5px 1px rgba(0,0,0,0.35);">{{time}}</span>
+          </span>
+          <span style="display: {{titleDisp}};">{{title}}</span>
+        </span>
+
+        <svg width="22" height="14" viewBox="0 0 28 14" fill="none" stroke="currentColor" stroke-width="1.2" style="opacity: 0.85;"><rect x="1" y="1.5" width="22" height="11" rx="3"></rect><rect x="3" y="3.5" width="14" height="7" rx="1.5" fill="currentColor" stroke="none"></rect><path d="M25 5v4" stroke-linecap="round"></path></svg>
+        <span style="opacity: 0.9;">周五 9:41</span>
+      </div>
+    </div>
+  </sc-for>
+
+  <div style="position: absolute; left: 30px; right: 30px; top: 290px; display: flex; flex-direction: column; gap: 14px;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <div style="width: 64px; font-size: 11px; color: rgba(255,255,255,0.52);">样式</div>
+      <div class="chip" onClick="{{pickRing}}" style="{{ringChip}}">圆环</div>
+      <div class="chip" onClick="{{pickBadge}}" style="{{badgeChip}}">徽标</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+      <div style="width: 64px; font-size: 11px; color: rgba(255,255,255,0.52);">状态</div>
+      <sc-for list="{{states}}" as="s" hint-placeholder-count="5">
+        <div class="chip" onClick="{{s.click}}" style="{{s.style}}">{{s.label}}</div>
+      </sc-for>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <div style="width: 64px; font-size: 11px; color: rgba(255,255,255,0.52);">显示内容</div>
+      <div class="chip" onClick="{{pickIcon}}" style="{{iconChip}}">仅图标</div>
+      <div class="chip" onClick="{{pickTime}}" style="{{timeChip}}">仅剩余时间</div>
+      <div class="chip" onClick="{{pickBoth}}" style="{{bothChip}}">名称与剩余时间</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <div style="width: 64px; font-size: 11px; color: rgba(255,255,255,0.52);">徽标底色</div>
+      <div class="chip" onClick="{{pickFillOn}}" style="{{fillOnChip}}">随进度填充</div>
+      <div class="chip" onClick="{{pickFillOff}}" style="{{fillOffChip}}">纯色</div>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 30px; right: 30px; top: 470px; font-size: 11px; line-height: 1.6; color: rgba(255,255,255,0.52);">
+    规格：徽标高 20、圆角 6、左右内边距 8，文字 13 / Medium，白色带 0.5pt 的暗阴影以保证在浅色菜单栏上可读。底色 = 状态色 40%，进度填充 = 状态色 90%。圆环与徽标都显示同一个剩余时间。
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":760,"height":560}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { style: 'badge', st: 'event', content: 'both', fill: true };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const set = (p) => this.setState(p);
+    const S = {
+      event: { label: '日程倒计时', time: '23:47', title: 'EK 210 Lab', rgb: '10,132,255', pct: 0.78 },
+      warn:  { label: '临近结束', time: '04:53', title: 'EK 210 Lab', rgb: '255,159,10', pct: 0.96 },
+      focus: { label: '专注中', time: '18:42', title: 'Focus', rgb: '48,209,88', pct: 0.25 },
+      brk:   { label: '休息中', time: '03:21', title: 'Take a Break', rgb: '48,209,88', pct: 0.33 },
+      idle:  { label: '空闲 下一个日程', time: '↑32:10', title: 'Team Standup', rgb: '150,150,165', pct: 0 }
+    };
+    const cur = S[s.st];
+    const circ = 43.35;
+    const bars = [
+      { name: '浅色菜单栏', top: '108px', bg: 'rgba(238,238,243,0.90)', fg: '#111114', edge: 'rgba(0,0,0,0.12)', track: 'rgba(0,0,0,0.25)', light: true },
+      { name: '深色菜单栏', top: '190px', bg: 'rgba(28,28,34,0.88)', fg: '#ffffff', edge: 'rgba(255,255,255,0.10)', track: 'rgba(255,255,255,0.30)', light: false }
+    ].map((m) => {
+      const a = m.light ? [0.55, 1] : [0.40, 0.90];
+      const rgb = m.light && s.st !== 'idle' ? cur.rgb.split(',').map((x) => Math.round(+x * 0.72)).join(',') : cur.rgb;
+      const base = s.fill ? 'rgba(' + cur.rgb + ',' + a[0] + ')' : 'rgba(' + cur.rgb + ',' + (m.light ? 0.9 : 0.85) + ')';
+      return Object.assign({}, m, {
+        ringDisp: s.style === 'ring' ? 'flex' : 'none',
+        badgeDisp: s.style === 'badge' ? 'flex' : 'none',
+        badgeBase: s.fill ? 'rgba(' + rgb + ',' + (m.light ? 0.50 : 0.40) + ')' : 'rgba(' + rgb + ',' + (m.light ? 0.95 : 0.85) + ')',
+        badgeFill: s.fill ? 'rgba(' + rgb + ',' + (m.light ? 1 : 0.90) + ')' : 'transparent'
+      });
+    });
+    const chip = (on) => on ? 'color: #fff; background: rgba(76,141,255,0.38); box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.3);' : '';
+    return {
+      bars: bars,
+      dash: (cur.pct * circ).toFixed(2),
+      fillW: (cur.pct * 100).toFixed(0) + '%',
+      time: cur.time, title: cur.title,
+      timeDisp: s.content === 'icon' ? 'none' : 'inline',
+      titleDisp: s.content === 'both' ? 'inline' : 'none',
+      states: Object.keys(S).map((k) => ({ label: S[k].label, style: chip(s.st === k), click: () => set({ st: k }) })),
+      ringChip: chip(s.style === 'ring'), badgeChip: chip(s.style === 'badge'),
+      pickRing: () => set({ style: 'ring' }), pickBadge: () => set({ style: 'badge' }),
+      iconChip: chip(s.content === 'icon'), timeChip: chip(s.content === 'time'), bothChip: chip(s.content === 'both'),
+      pickIcon: () => set({ content: 'icon' }), pickTime: () => set({ content: 'time' }), pickBoth: () => set({ content: 'both' }),
+      fillOnChip: chip(s.fill), fillOffChip: chip(!s.fill),
+      pickFillOn: () => set({ fill: true }), pickFillOff: () => set({ fill: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>v7.8 统计 · 只统计时间</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text',system-ui,sans-serif;-webkit-font-smoothing:antialiased;user-select:none}
+.bar{transition:height .38s cubic-bezier(.32,.72,0,1),opacity .2s ease,filter .2s ease,left .38s cubic-bezier(.32,.72,0,1),width .38s cubic-bezier(.32,.72,0,1)}
+.seg{transition:background .2s ease,color .2s ease}
+.nav{transition:background .15s ease,opacity .15s ease}
+.nav:hover{background:rgba(255,255,255,0.20)}
+.chip:hover{background:rgba(255,255,255,0.18)}
+.mi{padding:7px 14px;font-size:12px;color:#fff;cursor:pointer;display:flex;gap:8px;align-items:center;white-space:nowrap}
+.mi:hover{background:rgba(255,255,255,0.14)}
+</style>
+</helmet>
+<div style="width: 620px; height: 720px; box-sizing: border-box; background: radial-gradient(120% 140% at 18% 8%, #3a4a6b 0%, #222a3d 42%, #14161f 100%); position: relative; overflow: hidden;">
+
+  <div onClick="{{closeMenu}}" style="position: absolute; left: 30px; top: 30px; width: 560px; height: 660px; border-radius: 26px; overflow: hidden; background: rgba(34,38,52,0.80); backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), inset 0 0 0 0.5px rgba(255,255,255,0.16), 0 24px 60px rgba(0,0,0,0.5);">
+
+    <!-- 标题栏 -->
+    <div style="position: absolute; left: 0; right: 0; top: 0; height: 44px;">
+      <div style="position: absolute; left: 16px; top: 16px; display: flex; gap: 8px;">
+        <div style="width: 12px; height: 12px; border-radius: 6px; background: #FF5F57;"></div>
+        <div style="width: 12px; height: 12px; border-radius: 6px; background: #FEBC2E;"></div>
+        <div style="width: 12px; height: 12px; border-radius: 6px; background: #28C840;"></div>
+      </div>
+      <div style="position: absolute; left: 0; right: 0; top: 14px; text-align: center; font-size: 13px; font-weight: 590; color: rgba(255,255,255,0.78);">统计</div>
+    </div>
+
+    <!-- 第一行：指标下拉 + 周期切换 -->
+    <div style="position: absolute; left: 28px; right: 28px; top: 62px; height: 40px;">
+      <div style="position: absolute; left: 0; top: 0;">
+        <div class="chip" onClick="{{toggleMenu}}" style="height: 36px; padding: 0 16px; border-radius: 18px; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.10); box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.25), inset 0 0 0 0.5px rgba(255,255,255,0.12); cursor: pointer; transition: background .15s ease;">{{metricLabel}}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"></path></svg></div>
+        <div style="display: {{menuDisp}}; position: absolute; left: 0; top: 42px; z-index: 40; min-width: 150px; padding: 4px 0; border-radius: 12px; background: rgba(52,58,74,0.96); box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.18), 0 12px 30px rgba(0,0,0,0.5); flex-direction: column;">
+          <div class="mi" onClick="{{pickTotal}}"><span style="width: 12px; opacity: {{totalSel}};">✓</span>总时长</div>
+          <div class="mi" onClick="{{pickAvg}}"><span style="width: 12px; opacity: {{avgSel}};">✓</span>日均时长</div>
+        </div>
+      </div>
+      <div style="position: absolute; right: 0; top: 0; display: flex; padding: 3px; height: 36px; box-sizing: border-box; border-radius: 18px; background: rgba(255,255,255,0.10); box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.12);">
+        <sc-for list="{{views}}" as="v" hint-placeholder-count="4">
+          <div class="seg" onClick="{{v.click}}" style="{{v.style}}">{{v.label}}</div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- 第二行：总量 + 变化 + 日期翻页 -->
+    <div style="position: absolute; left: 28px; right: 28px; top: 120px; height: 112px;">
+      <div style="position: absolute; left: 0; top: 0; display: flex; align-items: baseline; gap: 6px; font-variant-numeric: tabular-nums;">
+        <span style="font-size: 60px; font-weight: 600; letter-spacing: -0.04em; line-height: 1; color: #fff; display: {{hDisp}};">{{hVal}}</span><span style="font-size: 16px; font-weight: 500; color: rgba(255,255,255,0.55); margin-right: 6px; display: {{hDisp}};">小时</span>
+        <span style="font-size: 60px; font-weight: 600; letter-spacing: -0.04em; line-height: 1; color: #fff;">{{mVal}}</span><span style="font-size: 16px; font-weight: 500; color: rgba(255,255,255,0.55);">分</span>
+      </div>
+      <div style="position: absolute; left: 0; bottom: 0; height: 30px; padding: 0 12px; border-radius: 15px; display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 590; font-variant-numeric: tabular-nums; color: {{deltaColor}}; background: {{deltaBg}};">
+        <span style="font-size: 10px;">{{deltaArrow}}</span>{{deltaText}}
+      </div>
+      <div style="position: absolute; right: 0; bottom: 0; display: flex; align-items: center; gap: 12px;">
+        <div class="nav" onClick="{{prev}}" style="width: 38px; height: 38px; border-radius: 19px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.10); box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.12); cursor: pointer; color: rgba(255,255,255,0.85);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg></div>
+        <div style="font-size: 15px; font-weight: 600; color: #fff; min-width: 178px; text-align: center; letter-spacing: -0.01em;">{{rangeText}}</div>
+        <div class="nav" onClick="{{next}}" style="width: 38px; height: 38px; border-radius: 19px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.10); box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.12); cursor: {{nextCursor}}; opacity: {{nextOp}}; color: rgba(255,255,255,0.85);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></div>
+      </div>
+    </div>
+
+    <!-- 图表：横线 + 右侧刻度 + 圆头柱 -->
+    <div style="position: absolute; left: 28px; right: 28px; top: 262px; height: 340px;" onMouseLeave="{{leave}}">
+      <sc-for list="{{grid}}" as="g" hint-placeholder-count="4">
+        <div style="position: absolute; left: 0; right: 36px; top: {{g.top}}; height: 0.5px; background: rgba(255,255,255,0.14);"></div>
+      </sc-for>
+      <sc-for list="{{grid}}" as="g" hint-placeholder-count="4">
+        <div style="position: absolute; right: 0; top: {{g.labelTop}}; width: 32px; text-align: right; font-size: 11px; font-weight: 590; color: rgba(255,255,255,0.45); display: {{g.labelDisp}};">{{g.label}}</div>
+      </sc-for>
+      <sc-for list="{{bars}}" as="b" hint-placeholder-count="7">
+        <div class="bar" onMouseEnter="{{b.enter}}" style="{{b.style}}"></div>
+      </sc-for>
+      <sc-for list="{{bars}}" as="b" hint-placeholder-count="7">
+        <div style="position: absolute; top: 312px; left: {{b.cx}}; width: 40px; margin-left: -20px; text-align: center; font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.45); display: {{b.labDisp}};">{{b.label}}</div>
+      </sc-for>
+      <div style="{{tipStyle}}">{{tipText}}</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":620,"height":720}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { view: 'W', off: 0, metric: 'total', menu: false, hover: -1 };
+  }
+
+  rnd(seed) {
+    let a = seed >>> 0;
+    return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+
+  // 今天：2026-10-02（周五）
+  gen(view, off) {
+    const TODAY = new Date(2026, 9, 2);
+    const R = this.rnd((view.charCodeAt(0) * 1000 + off * 7919 + 13) | 0);
+    const WK = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    const fmt = (d) => (d.getMonth() + 1) + '月' + d.getDate() + '日';
+    if (view === 'W') {
+      const mon = new Date(2026, 8, 28 + 7 * off), sun = new Date(2026, 8, 28 + 7 * off + 6);
+      let vals;
+      if (off === 0) vals = [0, 3.8, 5.9, 2.2, 1.1, 0, 0];
+      else if (off === -1) vals = [0.5, 1.2, 0.8, 1.5, 0.4, 0.3, 0.3];
+      else vals = WK.map((_, i) => (R() < 0.18 ? 0 : Math.round((0.8 + R() * 5.2) * 10) / 10));
+      return { vals, labels: ['一', '二', '三', '四', '五', '六', '日'], full: WK.map((w, i) => w + ' ' + fmt(new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i))), range: mon.getFullYear() + '年' + fmt(mon) + ' – ' + fmt(sun), days: off === 0 ? 5 : 7, labelEvery: 1 };
+    }
+    if (view === 'D') {
+      const d = new Date(2026, 9, 2 + off);
+      const vals = new Array(24).fill(0);
+      if (off === 0) { vals[9] = 0.5; vals[10] = 0.4; vals[11] = 0.2; }
+      else for (let h = 8; h < 20; h++) vals[h] = R() < 0.35 ? 0 : Math.round((0.15 + R() * 0.85) * 100) / 100;
+      return { vals, labels: vals.map((_, h) => String(h)), full: vals.map((_, h) => h + ':00 – ' + (h + 1) + ':00'), range: d.getFullYear() + '年' + fmt(d), days: 1, labelEvery: 3 };
+    }
+    if (view === 'M') {
+      const first = new Date(2026, 9 + off, 1), n = new Date(2026, 9 + off + 1, 0).getDate();
+      const vals = new Array(n).fill(0);
+      if (off === 0) { vals[0] = 2.2; vals[1] = 1.1; }
+      else for (let i = 0; i < n; i++) vals[i] = R() < 0.25 ? 0 : Math.round((0.5 + R() * 5.5) * 10) / 10;
+      return { vals, labels: vals.map((_, i) => String(i + 1)), full: vals.map((_, i) => (first.getMonth() + 1) + '月' + (i + 1) + '日'), range: first.getFullYear() + '年' + (first.getMonth() + 1) + '月', days: off === 0 ? 2 : n, labelEvery: 5 };
+    }
+    const y = 2026 + off;
+    const vals = new Array(12).fill(0);
+    for (let m = 0; m < 12; m++) vals[m] = (off === 0 && m > 9) ? 0 : (off === 0 && m === 9) ? 3.3 : Math.round((20 + R() * 70) * 10) / 10;
+    return { vals, labels: vals.map((_, m) => String(m + 1)), full: vals.map((_, m) => y + '年' + (m + 1) + '月'), range: y + '年', days: off === 0 ? 275 : 365, labelEvery: 1 };
+  }
+
+  fmtDur(h) {
+    const t = Math.round(h * 60);
+    const hh = Math.floor(t / 60), mm = t % 60;
+    return hh > 0 ? hh + '小时' + (mm ? mm + '分' : '') : mm + '分';
+  }
+
+  renderVals() {
+    const s = this.state;
+    const set = (p) => this.setState(p);
+    const cur = this.gen(s.view, s.off);
+    const prev = this.gen(s.view, s.off - 1);
+    const sum = (a) => a.reduce((x, y) => x + y, 0);
+    const per = (g) => s.metric === 'avg' ? sum(g.vals) / Math.max(1, g.days) : sum(g.vals);
+    const total = per(cur), ptotal = per(prev);
+    const tm = Math.round(total * 60);
+    const hVal = Math.floor(tm / 60), mVal = String(tm % 60).padStart(hVal > 0 ? 2 : 1, '0');
+    let delta = null;
+    if (ptotal > 0.001) delta = (total - ptotal) / ptotal * 100;
+    const up = delta === null ? true : delta >= 0;
+
+    // 图表几何
+    const CW = 504 - 36, PH = 300;
+    const n = cur.vals.length;
+    const slot = CW / n;
+    const bw = Math.max(5, Math.min(52, slot * 0.66));
+    const mx = Math.max(0.1, Math.max.apply(null, cur.vals));
+    const steps = [0.25, 0.5, 1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 60, 80, 100];
+    let st = steps[steps.length - 1];
+    for (let i = 0; i < steps.length; i++) { if (steps[i] * 3 >= mx) { st = steps[i]; break; } }
+    const top = st * 3;
+    const lab = (v) => v < 1 ? Math.round(v * 60) + '分' : v + 'h';
+    const grid = [0, 1, 2, 3].map((k) => {
+      const y = PH - (k / 3) * PH;
+      return { top: y + 'px', labelTop: (y - 8) + 'px', label: k === 0 ? '' : lab(st * k), labelDisp: k === 0 ? 'none' : 'block' };
+    });
+    const bars = cur.vals.map((v, i) => {
+      const x = i * slot + (slot - bw) / 2;
+      const h = v > 0 ? Math.max(bw, v / top * PH) : 0;
+      const hot = s.hover === i;
+      const style = [
+        'position: absolute', 'left: ' + x.toFixed(1) + 'px', 'width: ' + bw.toFixed(1) + 'px',
+        'bottom: ' + (340 - PH) + 'px', 'height: ' + h.toFixed(1) + 'px',
+        'border-radius: ' + (bw / 2).toFixed(1) + 'px',
+        'background: linear-gradient(180deg, rgba(122,214,168,0.92) 0%, rgba(52,150,112,0.92) 100%)',
+        'box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 0 ' + (hot ? 22 : 12) + 'px rgba(80,200,150,' + (hot ? 0.45 : 0.22) + ')',
+        'opacity: ' + (s.hover >= 0 && !hot ? 0.55 : 1),
+        'cursor: default'
+      ].join('; ');
+      return {
+        style, cx: (x + bw / 2).toFixed(1) + 'px',
+        label: cur.labels[i], labDisp: (i % cur.labelEvery === 0 || (s.view === 'M' && i === n - 1 && false)) ? 'block' : 'none',
+        enter: () => set({ hover: i })
+      };
+    });
+    const hv = s.hover;
+    let tipStyle = 'display: none;', tipText = '';
+    if (hv >= 0 && cur.vals[hv] > 0) {
+      const x = hv * slot + slot / 2;
+      const h = Math.max(bw, cur.vals[hv] / top * PH);
+      tipText = cur.full[hv] + '  ' + this.fmtDur(cur.vals[hv]);
+      tipStyle = 'position: absolute; z-index: 30; pointer-events: none; white-space: nowrap; left: ' + Math.max(70, Math.min(CW - 70, x)).toFixed(1) + 'px; top: ' + (PH - h - 40).toFixed(1) + 'px; transform: translateX(-50%); padding: 6px 12px; border-radius: 12px; font-size: 12px; font-weight: 590; color: #fff; background: rgba(60,68,86,0.95); box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.2), 0 8px 20px rgba(0,0,0,0.4);';
+    }
+
+    const vdefs = [['D', '日'], ['W', '周'], ['M', '月'], ['Y', '年']];
+    const views = vdefs.map((d) => {
+      const on = s.view === d[0];
+      return {
+        label: d[1],
+        click: () => set({ view: d[0], off: 0, hover: -1 }),
+        style: 'width: 48px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 15px; font-size: 14px; font-weight: 590; cursor: pointer; color: ' + (on ? '#fff' : 'rgba(255,255,255,0.5)') + '; background: ' + (on ? 'rgba(255,255,255,0.20)' : 'transparent') + ';' + (on ? ' box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.4), 0 2px 6px rgba(0,0,0,0.2);' : '')
+      };
+    });
+
+    return {
+      views: views, bars: bars, grid: grid, tipStyle: tipStyle, tipText: tipText,
+      metricLabel: s.metric === 'avg' ? '日均时长' : '总时长',
+      menuDisp: s.menu ? 'flex' : 'none',
+      toggleMenu: (e) => { e.stopPropagation(); set({ menu: !s.menu }); },
+      closeMenu: () => { if (s.menu) set({ menu: false }); },
+      pickTotal: (e) => { e.stopPropagation(); set({ metric: 'total', menu: false }); },
+      pickAvg: (e) => { e.stopPropagation(); set({ metric: 'avg', menu: false }); },
+      totalSel: s.metric === 'total' ? '1' : '0', avgSel: s.metric === 'avg' ? '1' : '0',
+      hDisp: hVal > 0 ? 'inline' : 'none', hVal: String(hVal), mVal: mVal,
+      deltaText: delta === null ? '—' : Math.abs(Math.round(delta)) + '%',
+      deltaArrow: delta === null ? '' : (up ? '▲' : '▼'),
+      deltaColor: delta === null ? 'rgba(255,255,255,0.6)' : (up ? '#7be0ad' : '#ff9a8f'),
+      deltaBg: delta === null ? 'rgba(255,255,255,0.10)' : (up ? 'rgba(80,200,150,0.16)' : 'rgba(255,100,90,0.14)'),
+      rangeText: cur.range,
+      prev: () => set({ off: s.off - 1, hover: -1 }),
+      next: () => { if (s.off < 0) set({ off: s.off + 1, hover: -1 }); },
+      nextOp: s.off < 0 ? '1' : '0.35', nextCursor: s.off < 0 ? 'pointer' : 'default',
+      leave: () => set({ hover: -1 })
+    };
+  }
+}
+</script>
+</body>
+</html>
