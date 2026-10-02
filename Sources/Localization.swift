@@ -291,6 +291,21 @@ private let l10nTable: [String: [String: String]] = [
         "stats.a11y.next": [
             "zh-Hans": "下一页", "zh-Hant": "下一頁", "en": "Next"],
 
+        "focus.writeCalendar": [
+            "zh-Hans": "把专注写入日历", "zh-Hant": "把專注寫入日曆",
+            "en": "Add focus sessions to Calendar"],
+
+        "focus.writeCalendar.hint": [
+            "zh-Hans": "每完成一段专注，在日历里写一个标为“空闲”的事件。需要完整的日历访问权限。",
+            "zh-Hant": "每完成一段專注，在日曆裡寫一個標為「空閒」的事件。需要完整的日曆存取權限。",
+            "en": "Each finished focus session is saved as a Free event. Requires full calendar access."],
+
+        "focus.calendar": [
+            "zh-Hans": "写入的日历", "zh-Hant": "寫入的日曆", "en": "Calendar"],
+
+        "focus.calendar.new": [
+            "zh-Hans": "新建“专注”日历", "zh-Hant": "新建「專注」日曆", "en": "New “Focus” calendar"],
+
         "sec.menubar": [
             "zh-Hans": "菜单栏", "zh-Hant": "選單列", "en": "Menu Bar", "ja": "メニューバー",
             "ko": "메뉴 막대", "de": "Menüleiste", "fr": "Barre des menus",

@@ -116,6 +116,8 @@ final class SettingsStore: ObservableObject {
         static let autoStartFocus    = "focus.autoStartFocus"
         static let keepAwake         = "focus.keepAwake"
         static let flowCardSlot      = "cards.flowSlot"
+        static let writeToCalendar   = "focus.writeToCalendar"
+        static let focusCalendarID   = "focus.calendarID"
     }
 
     /// 存“排除”而不是“勾选”，这样新加的日历默认参与倒计时
@@ -195,6 +197,15 @@ final class SettingsStore: ObservableObject {
         didSet { defaults.set(flowCardSlot, forKey: Key.flowCardSlot) }
     }
 
+    /// 把完成的专注写入日历。需要完整日历访问权限
+    @Published var writeToCalendar: Bool {
+        didSet { defaults.set(writeToCalendar, forKey: Key.writeToCalendar) }
+    }
+    /// 写入的目标日历。空表示还没选，第一次写入时会新建一个专注日历并记在这里
+    @Published var focusCalendarID: String {
+        didSet { defaults.set(focusCalendarID, forKey: Key.focusCalendarID) }
+    }
+
     var focusConfig: FocusConfig {
         FocusConfig(focusDuration: TimeInterval(focusMinutes) * 60,
                     shortBreakDuration: TimeInterval(shortBreakMinutes) * 60,
@@ -232,7 +243,9 @@ final class SettingsStore: ObservableObject {
             Key.autoStartBreak: false,
             Key.autoStartFocus: false,
             Key.keepAwake: true,
-            Key.flowCardSlot: -1
+            Key.flowCardSlot: -1,
+            Key.writeToCalendar: false,
+            Key.focusCalendarID: ""
         ])
         self.excludedCalendarIDs = Set(defaults.stringArray(forKey: Key.excludedCalendars) ?? [])
         self.includeAllDay      = defaults.bool(forKey: Key.includeAllDay)
@@ -255,6 +268,8 @@ final class SettingsStore: ObservableObject {
         self.autoStartFocus     = defaults.bool(forKey: Key.autoStartFocus)
         self.keepAwake          = defaults.bool(forKey: Key.keepAwake)
         self.flowCardSlot       = defaults.integer(forKey: Key.flowCardSlot)
+        self.writeToCalendar    = defaults.bool(forKey: Key.writeToCalendar)
+        self.focusCalendarID    = defaults.string(forKey: Key.focusCalendarID) ?? ""
         // didSet 在 init 里不触发，这里补一次
         L10n.shared.apply(self.language)
     }

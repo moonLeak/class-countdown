@@ -21,7 +21,7 @@
     <key>LSUIElement</key>
     <true/>
     <key>NSCalendarsFullAccessUsageDescription</key>
-    <string>读取你的日历，计算当前日程还剩多久结束。数据只留在本机，不上传、不修改任何日程。</string>
+    <string>读取你的日历，计算当前日程还剩多久结束。开启“把专注写入日历”后，会把完成的专注记为日历里的空闲事件。数据只留在本机和你自己的日历账号里，不上传，也不修改已有的日程。</string>
     <key>NSHumanReadableCopyright</key>
     <string>Carson</string>
 </dict>

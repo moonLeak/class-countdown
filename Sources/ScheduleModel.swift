@@ -111,6 +111,8 @@ final class ScheduleModel: ObservableObject {
     private func keep(_ event: EKEvent) -> Bool {
         guard let s = event.startDate, let e = event.endDate, e >= s else { return false }
         if event.isAllDay && !settings.includeAllDay { return false }
+        // 自己写进日历的专注事件不算日程，否则会被当成课程显示
+        if FocusCalendarMarker.isOurs(notes: event.notes) { return false }
         if let calID = event.calendar?.calendarIdentifier,
            !settings.isEnabled(calendarID: calID) { return false }
         return true

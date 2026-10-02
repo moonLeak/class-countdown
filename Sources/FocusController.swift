@@ -16,6 +16,7 @@ final class FocusController: ObservableObject {
     private let tick: TickEngine
     private let store = FocusController.makeStore()
     private let awake = ScreenAwake()
+    private let calendarWriter = FocusCalendarWriter()
     private var bag = Set<AnyCancellable>()
 
     init(settings: SettingsStore, tick: TickEngine) {
@@ -129,10 +130,29 @@ final class FocusController: ObservableObject {
         guard changed else { return }
         objectWillChange.send()
 
-        finished.forEach { store.append($0) }
+        finished.forEach { store.append($0); writeToCalendar($0) }
         if next.isBreak, !Self.isBreak(before) { breakTitleIndex += 1 }
         awake.set(settings.keepAwake && next.state == .focusing)
         saveSnapshot(now: Date())
+    }
+
+    private func writeToCalendar(_ block: FocusBlock) {
+        guard settings.writeToCalendar else { return }
+        let out = calendarWriter.write(
+            block, title: L("flow.title.focus"),
+            calendarID: settings.focusCalendarID,
+            newCalendarTitle: L("flow.title.focus"))
+        // 第一次写入时新建了日历，记下它，之后都写到同一个
+        if settings.focusCalendarID.isEmpty, !out.calendarID.isEmpty, out.result == .written {
+            settings.focusCalendarID = out.calendarID
+        }
+    }
+
+    /// 设置页的日历列表用
+    var writableCalendars: [(id: String, title: String, source: String)] {
+        calendarWriter.writableCalendars().map {
+            ($0.calendarIdentifier, $0.title, $0.source?.title ?? "")
+        }
     }
 
     private static func isBreak(_ s: FocusState) -> Bool {

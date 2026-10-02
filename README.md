@@ -75,9 +75,15 @@ xattr -dr com.apple.quarantine /Applications/TimeTool.app
 
 ## First run
 
-The app asks for calendar access on launch. It reads only event **titles and
-start/end times**. It never modifies an event, never goes online, and never
-uploads anything. Once you grant access the countdown appears immediately.
+The app asks for calendar access on launch (full access). It reads event
+**titles and start/end times** to work out the countdown, never goes online, and
+never uploads anything. It never modifies or deletes any event you already have.
+Once you grant access the countdown appears immediately.
+
+Only if you turn on **Add focus sessions to Calendar** in the Focus tab of
+Settings does the app add events: one event marked *Free* for each finished
+focus session, in a new "Focus" calendar by default. Those events carry a
+marker, so the countdown never mistakes them for your schedule.
 
 ### What about Google Calendar
 
@@ -120,7 +126,7 @@ Right-click anywhere on the card and choose **Settings…**:
 
 - No notifications, no alarms, no interruptions
 - No history, no time tracking, no stats
-- Never creates, edits, or deletes an event
+- Never edits or deletes an event you already have (with *Add focus sessions to Calendar* on, it only adds its own focus events)
 - No network access at all
 
 ---

@@ -7,5 +7,5 @@ OUT="$(mktemp -d)/focus-tests"
 swiftc -O \
   -target "$(uname -m)-apple-macos26.0" \
   -o "$OUT" \
-  Sources/FocusEngine.swift Sources/FocusStore.swift Sources/StatsAggregator.swift Tests/main.swift
+  Sources/FocusEngine.swift Sources/FocusStore.swift Sources/StatsAggregator.swift Sources/FocusCalendarMarker.swift Tests/main.swift
 "$OUT"

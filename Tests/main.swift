@@ -333,5 +333,16 @@ test("统计：友好刻度") {
     expect(StatsAggregator.niceStep(maxSeconds: h(160)) == h(100) , "超出表后按 1/2/2.5/5 乘十的幂")
 }
 
+test("日历标记：能识别自己写入的专注事件，也能取回记录 ID") {
+    let b = block(utc(2026, 10, 2, 9), minutes: 25)
+    let notes = FocusCalendarMarker.notes(for: b)
+    expect(FocusCalendarMarker.isOurs(notes: notes), "带标记的是自己的")
+    expect(FocusCalendarMarker.blockID(from: notes) == b.id, "能取回记录 ID")
+    expect(!FocusCalendarMarker.isOurs(notes: "EK 210 Lab"), "普通日程不是")
+    expect(!FocusCalendarMarker.isOurs(notes: nil), "没有备注不是")
+    expect(FocusCalendarMarker.blockID(from: "用户自己写的备注\n" + notes + "\n后面还有字") == b.id,
+           "标记前后有别的文字也能识别")
+}
+
 print("\n\(checks) checks, \(failures) failures")
 exit(failures == 0 ? 0 : 1)

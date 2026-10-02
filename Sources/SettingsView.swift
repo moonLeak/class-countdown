@@ -15,7 +15,7 @@ struct SettingsRoot: View {
             switch navigation.tab {
             case .general:   GeneralTab(settings: settings)
             case .calendars: CalendarsTab(settings: settings, calendarService: calendarService)
-            case .focus:     FocusTab(settings: settings)
+            case .focus:     FocusTab(settings: settings, focus: AppState.shared.focus)
             case .about:     AboutTab()
             }
         }
@@ -126,6 +126,7 @@ private struct CalendarsTab: View {
 
 private struct FocusTab: View {
     @ObservedObject var settings: SettingsStore
+    let focus: FocusController
 
     var body: some View {
         Form {
@@ -148,6 +149,22 @@ private struct FocusTab: View {
 
             Section {
                 Toggle(L("focus.keepAwake"), isOn: $settings.keepAwake)
+            }
+
+            Section {
+                Toggle(L("focus.writeCalendar"), isOn: $settings.writeToCalendar)
+                if settings.writeToCalendar {
+                    Picker(L("focus.calendar"), selection: $settings.focusCalendarID) {
+                        Text(L("focus.calendar.new")).tag("")
+                        ForEach(focus.writableCalendars, id: \.id) { c in
+                            Text(c.source.isEmpty ? c.title : "\(c.title) · \(c.source)").tag(c.id)
+                        }
+                    }
+                }
+            } header: {
+                Text(L("tab.calendars"))
+            } footer: {
+                Text(L("focus.writeCalendar.hint"))
             }
         }
         .formStyle(.grouped)
