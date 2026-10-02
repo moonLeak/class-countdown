@@ -184,9 +184,9 @@ private let l10nTable: [String: [String: String]] = [
             "en": "Show next event when idle"],
 
         "menubar.showNext.hint": [
-            "zh-Hans": "没有进行中的日程时，菜单栏显示下一个日程的倒计时",
-            "zh-Hant": "沒有進行中的行程時，選單列顯示下一個行程的倒數",
-            "en": "When nothing is running, the menu bar counts down to the next event"],
+            "zh-Hans": "没有进行中的日程时，菜单栏和卡片显示下一个日程的倒计时",
+            "zh-Hant": "沒有進行中的行程時，選單列和卡片顯示下一個行程的倒數",
+            "en": "When nothing is running, the menu bar and the cards count down to the next event"],
 
         "flow.title.focus": [
             "zh-Hans": "专注", "zh-Hant": "專注", "en": "Focus"],

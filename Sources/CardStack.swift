@@ -62,7 +62,9 @@ struct CardStack: View {
         switch model.phase {
         case .needsAccess:       list = [.access]
         case .empty:             list = [.empty]
-        case .upcoming(let e):   list = [.event(e, toStart: true)]
+        // 和菜单栏同一个开关：关掉“空闲时显示下一个日程”，卡叠里也不放下一个日程，
+        // 只剩 Flow 卡。这里不用“没有日程”的提示卡，因为日程其实是有的
+        case .upcoming(let e):   list = settings.showNextWhenIdle ? [.event(e, toStart: true)] : []
         case .running(let evs):  list = evs.map { .event($0, toStart: false) }
         }
         list.append(.flow)

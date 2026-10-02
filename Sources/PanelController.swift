@@ -122,7 +122,7 @@ final class PanelController: NSObject {
                                        accessibilityDescription: L("a11y.noEvents"))
                 return
             }
-            let time = "↑" + TimeFormat.countdown(model.remaining(e, now: now, counting: true))
+            let time = "→" + TimeFormat.countdown(model.remaining(e, now: now, counting: true))
             setMenuBar(title: e.title, time: time,
                        ringProgress: 0, badgeColor: .systemGray, idle: true)
         }
