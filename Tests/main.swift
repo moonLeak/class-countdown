@@ -234,5 +234,104 @@ test("FocusStore 读写、去重与补记") {
     expect(FocusStore(directory: dir).blocks.count == 2, "补记已落盘")
 }
 
+// MARK: 统计聚合
+
+func utcCalendar(firstWeekday: Int = 2) -> Calendar {
+    var c = Calendar(identifier: .gregorian)
+    c.timeZone = TimeZone(identifier: "UTC")!
+    c.firstWeekday = firstWeekday
+    return c
+}
+
+func utc(_ y: Int, _ m: Int, _ d: Int, _ h: Int = 0, _ min: Int = 0) -> Date {
+    let c = utcCalendar()
+    return c.date(from: DateComponents(year: y, month: m, day: d, hour: h, minute: min))!
+}
+
+func block(_ start: Date, minutes: Double) -> FocusBlock {
+    FocusBlock(id: UUID(), start: start, end: start.addingTimeInterval(minutes * 60),
+               duration: minutes * 60, isComplete: true)
+}
+
+test("统计：周按周一起算，7 个桶，按开始时间归日") {
+    let cal = utcCalendar(firstWeekday: 2)
+    // 2026-09-28 是周一
+    let blocks = [
+        block(utc(2026, 9, 28, 9), minutes: 25),
+        block(utc(2026, 9, 29, 23, 50), minutes: 25),    // 跨午夜，算周二
+        block(utc(2026, 9, 29, 10), minutes: 25),
+        block(utc(2026, 10, 5, 9), minutes: 25)          // 下一周
+    ]
+    let s = StatsAggregator.snapshot(blocks: blocks, period: .week, metric: .total,
+                                     anchor: utc(2026, 10, 1), now: utc(2026, 10, 2), calendar: cal)
+    expect(s.buckets.count == 7, "周有 7 个桶")
+    expect(s.rangeStart == utc(2026, 9, 28), "周起点是周一")
+    expect(s.buckets[0].seconds == 25 * 60, "周一 25 分钟")
+    expect(s.buckets[1].seconds == 50 * 60, "周二 50 分钟，含跨午夜的那块")
+    expect(s.value == 75 * 60, "总时长 75 分钟")
+    let sun = StatsAggregator.snapshot(blocks: blocks, period: .week, metric: .total,
+                                       anchor: utc(2026, 10, 1), now: utc(2026, 10, 2),
+                                       calendar: utcCalendar(firstWeekday: 1))
+    expect(sun.rangeStart == utc(2026, 9, 27), "周起始跟随区域设置：周日起算")
+}
+
+test("统计：日 24 桶，月按日，年 12 桶") {
+    let cal = utcCalendar()
+    let blocks = [block(utc(2026, 10, 2, 9, 30), minutes: 25), block(utc(2026, 10, 2, 14), minutes: 40)]
+    let d = StatsAggregator.snapshot(blocks: blocks, period: .day, metric: .total,
+                                     anchor: utc(2026, 10, 2, 12), now: utc(2026, 10, 2, 20), calendar: cal)
+    expect(d.buckets.count == 24 && d.buckets[9].seconds == 25 * 60 && d.buckets[14].seconds == 40 * 60, "日按小时")
+    let m = StatsAggregator.snapshot(blocks: blocks, period: .month, metric: .total,
+                                     anchor: utc(2026, 10, 15), now: utc(2026, 10, 20), calendar: cal)
+    expect(m.buckets.count == 31 && m.buckets[1].seconds == 65 * 60, "10 月 31 天，2 号 65 分钟")
+    let y = StatsAggregator.snapshot(blocks: blocks, period: .year, metric: .total,
+                                     anchor: utc(2026, 6, 1), now: utc(2026, 10, 20), calendar: cal)
+    expect(y.buckets.count == 12 && y.buckets[9].seconds == 65 * 60, "年按月，10 月 65 分钟")
+}
+
+test("统计：空数据与上一周期对比") {
+    let cal = utcCalendar()
+    let empty = StatsAggregator.snapshot(blocks: [], period: .week, metric: .total,
+                                         anchor: utc(2026, 10, 1), now: utc(2026, 10, 2), calendar: cal)
+    expect(empty.value == 0 && empty.delta == nil && empty.buckets.allSatisfy { $0.seconds == 0 }, "空数据为 0，没有变化比例")
+    let blocks = [block(utc(2026, 9, 22, 9), minutes: 50), block(utc(2026, 9, 29, 9), minutes: 130)]
+    let s = StatsAggregator.snapshot(blocks: blocks, period: .week, metric: .total,
+                                     anchor: utc(2026, 10, 1), now: utc(2026, 10, 2), calendar: cal)
+    expect(abs((s.delta ?? 0) - 1.6) < 1e-9, "130 对 50 分钟，涨 160%")
+}
+
+test("统计：日均按已过去的天数算") {
+    let cal = utcCalendar()
+    let blocks = [block(utc(2026, 9, 28, 9), minutes: 60), block(utc(2026, 9, 29, 9), minutes: 60)]
+    // 周三 (9/30) 查看本周：已过 3 天（周一二三）
+    let cur = StatsAggregator.snapshot(blocks: blocks, period: .week, metric: .dailyAverage,
+                                       anchor: utc(2026, 9, 30), now: utc(2026, 9, 30, 12), calendar: cal)
+    expect(abs(cur.value - 2400) < 1e-9, "120 分钟 / 3 天 = 40 分钟")
+    // 回头看已结束的一周：除以 7
+    let past = StatsAggregator.snapshot(blocks: blocks, period: .week, metric: .dailyAverage,
+                                        anchor: utc(2026, 9, 30), now: utc(2026, 10, 10), calendar: cal)
+    expect(abs(past.value - 120 * 60 / 7) < 1e-6, "过去的周除以 7")
+}
+
+test("统计：翻页边界") {
+    let cal = utcCalendar()
+    let now = utc(2026, 10, 2, 12)
+    expect(!StatsAggregator.canGoNext(anchor: now, period: .week, now: now, calendar: cal), "当前周不能翻下一页")
+    expect(StatsAggregator.canGoNext(anchor: utc(2026, 9, 24), period: .week, now: now, calendar: cal), "上一周可以")
+    let prev = StatsAggregator.shifted(now, period: .month, by: -1, calendar: cal)
+    expect(prev == utc(2026, 9, 2, 12), "上一个月")
+}
+
+test("统计：友好刻度") {
+    func h(_ x: Double) -> Double { x * 3600 }
+    expect(StatsAggregator.niceStep(maxSeconds: 0) == h(0.25), "空图最小步长")
+    expect(StatsAggregator.niceStep(maxSeconds: 25 * 60) == h(0.25), "25 分钟，3 × 15 分钟够了")
+    expect(StatsAggregator.niceStep(maxSeconds: 50 * 60) == h(0.5), "50 分钟用半小时步长")
+    expect(StatsAggregator.niceStep(maxSeconds: h(5.2)) == h(2), "5.2 小时用 2 小时步长")
+    expect(StatsAggregator.niceStep(maxSeconds: h(6)) == h(2), "刚好 6 小时")
+    expect(StatsAggregator.niceStep(maxSeconds: h(6.1)) == h(3), "6.1 小时用 3 小时")
+    expect(StatsAggregator.niceStep(maxSeconds: h(160)) == h(100) , "超出表后按 1/2/2.5/5 乘十的幂")
+}
+
 print("\n\(checks) checks, \(failures) failures")
 exit(failures == 0 ? 0 : 1)

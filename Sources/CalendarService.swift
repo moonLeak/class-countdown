@@ -58,7 +58,7 @@ final class CalendarService: ObservableObject {
 
     /// 开发用：启动参数 --mock-events <json 路径> 时，不读系统日历，也不请求权限，
     /// 直接用 JSON 里描述的日程。见 DevData/mock-events.json 与 dev.sh。
-    private static var mockPath: String? {
+    static var mockPath: String? {
         let args = CommandLine.arguments
         guard let i = args.firstIndex(of: "--mock-events"), i + 1 < args.count else { return nil }
         return args[i + 1]

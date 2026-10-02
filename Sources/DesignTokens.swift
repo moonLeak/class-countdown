@@ -45,6 +45,12 @@ enum DS {
     // MARK: 统计窗口
     static let statsW: CGFloat = 560
     static let statsH: CGFloat = 660
+    static let statsPad: CGFloat = 28
+    /// 柱宽 = 槽宽 × 0.66
+    static let statsBarRatio: CGFloat = 0.66
+    static let bar: Animation = .timingCurve(0.32, 0.72, 0, 1, duration: 0.38)
+    static let toggle: Animation = .easeInOut(duration: 0.2)
+    static let fNumeral: CGFloat = 60
 
     // MARK: Flow 卡底行
     /// 底行中心线距卡片底边，按钮、四个点、图标共用
@@ -114,6 +120,12 @@ enum DS {
         static let danger = SwiftUI.Color(red: 1.0, green: 69 / 255, blue: 58 / 255)       // #FF453A
         /// 日历没有颜色时的兜底
         static let eventDefault = SwiftUI.Color(red: 10 / 255, green: 132 / 255, blue: 1.0) // #0A84FF
+        /// 统计柱渐变
+        static let barTop = SwiftUI.Color(red: 122 / 255, green: 214 / 255, blue: 168 / 255)
+        static let barBottom = SwiftUI.Color(red: 52 / 255, green: 150 / 255, blue: 112 / 255)
+        /// 变化徽章：涨与跌
+        static let up = SwiftUI.Color(red: 0x7B / 255, green: 0xE0 / 255, blue: 0xAD / 255)
+        static let down = SwiftUI.Color(red: 1.0, green: 0x9A / 255, blue: 0x8F / 255)
     }
 
     // MARK: 动效

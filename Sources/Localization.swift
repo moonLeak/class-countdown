@@ -13,6 +13,9 @@ final class L10n: ObservableObject {
 
     @Published private(set) var code: String
 
+    /// 日期、星期这类系统格式化要用的区域，跟着界面语言走
+    var locale: Locale { Locale(identifier: code) }
+
     private init() { code = Self.systemCode() }
 
     func apply(_ language: AppLanguage) {
@@ -264,6 +267,29 @@ private let l10nTable: [String: [String: String]] = [
 
         "pill.focus": [
             "zh-Hans": "定位专注卡", "zh-Hant": "定位專注卡", "en": "Show focus card"],
+
+        "stats.metric.total": [
+            "zh-Hans": "总时长", "zh-Hant": "總時長", "en": "Total time"],
+
+        "stats.metric.average": [
+            "zh-Hans": "日均时长", "zh-Hant": "日均時長", "en": "Daily average"],
+
+        "stats.period.day": ["zh-Hans": "日", "zh-Hant": "日", "en": "D"],
+        "stats.period.week": ["zh-Hans": "周", "zh-Hant": "週", "en": "W"],
+        "stats.period.month": ["zh-Hans": "月", "zh-Hant": "月", "en": "M"],
+        "stats.period.year": ["zh-Hans": "年", "zh-Hant": "年", "en": "Y"],
+
+        "stats.unit.hour": [
+            "zh-Hans": "小时", "zh-Hant": "小時", "en": "h"],
+
+        "stats.unit.min": [
+            "zh-Hans": "分", "zh-Hant": "分", "en": "min"],
+
+        "stats.a11y.prev": [
+            "zh-Hans": "上一页", "zh-Hant": "上一頁", "en": "Previous"],
+
+        "stats.a11y.next": [
+            "zh-Hans": "下一页", "zh-Hant": "下一頁", "en": "Next"],
 
         "sec.menubar": [
             "zh-Hans": "菜单栏", "zh-Hant": "選單列", "en": "Menu Bar", "ja": "メニューバー",

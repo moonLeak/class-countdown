@@ -1,11 +1,17 @@
 import AppKit
 import SwiftUI
 
-/// 统计窗口。阶段 6 之前先放占位，窗口与激活策略的行为已经是最终的。
+/// 统计窗口：标准窗口，可缩放，与设置窗口共用激活策略逻辑。
 @MainActor
 final class StatsWindowController: NSObject, NSWindowDelegate {
 
     private var window: NSWindow?
+    private let focus: FocusController
+
+    init(focus: FocusController) {
+        self.focus = focus
+        super.init()
+    }
 
     func show() {
         if window == nil {
@@ -16,9 +22,7 @@ final class StatsWindowController: NSObject, NSWindowDelegate {
             w.isReleasedWhenClosed = false
             w.hidesOnDeactivate = false
             w.delegate = self
-            let host = NSHostingView(rootView: Text(L("stats.placeholder"))
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, maxHeight: .infinity))
+            let host = NSHostingView(rootView: StatsView(focus: focus))
             host.sizingOptions = []
             w.contentView = host
             if !w.setFrameAutosaveName("StatsWindow") { w.center() }

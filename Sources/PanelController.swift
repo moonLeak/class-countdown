@@ -26,7 +26,7 @@ final class PanelController: NSObject {
     private var isOpen = false
 
     private let state = AppState.shared
-    private lazy var statsController = StatsWindowController()
+    private lazy var statsController = StatsWindowController(focus: state.focus)
     private lazy var settingsController = SettingsWindowController(
         settings: state.settings, calendarService: state.calendar)
 
