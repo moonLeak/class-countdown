@@ -119,6 +119,7 @@ final class SettingsStore: ObservableObject {
         static let writeToCalendar   = "focus.writeToCalendar"
         static let focusCalendarID   = "focus.calendarID"
         static let notifyOnEnd       = "focus.notifyOnEnd"
+        static let cardClarity       = "cards.clarity"
     }
 
     /// 存“排除”而不是“勾选”，这样新加的日历默认参与倒计时
@@ -212,6 +213,11 @@ final class SettingsStore: ObservableObject {
         didSet { defaults.set(notifyOnEnd, forKey: Key.notifyOnEnd) }
     }
 
+    /// 卡片透明度，0 到 1，越大越透
+    @Published var cardClarity: Double {
+        didSet { defaults.set(cardClarity, forKey: Key.cardClarity) }
+    }
+
     var focusConfig: FocusConfig {
         FocusConfig(focusDuration: TimeInterval(focusMinutes) * 60,
                     shortBreakDuration: TimeInterval(shortBreakMinutes) * 60,
@@ -252,7 +258,8 @@ final class SettingsStore: ObservableObject {
             Key.flowCardSlot: -1,
             Key.writeToCalendar: false,
             Key.focusCalendarID: "",
-            Key.notifyOnEnd: true
+            Key.notifyOnEnd: true,
+            Key.cardClarity: DS.cardClarityDefault
         ])
         self.excludedCalendarIDs = Set(defaults.stringArray(forKey: Key.excludedCalendars) ?? [])
         self.includeAllDay      = defaults.bool(forKey: Key.includeAllDay)
@@ -278,6 +285,7 @@ final class SettingsStore: ObservableObject {
         self.writeToCalendar    = defaults.bool(forKey: Key.writeToCalendar)
         self.focusCalendarID    = defaults.string(forKey: Key.focusCalendarID) ?? ""
         self.notifyOnEnd        = defaults.bool(forKey: Key.notifyOnEnd)
+        self.cardClarity        = defaults.double(forKey: Key.cardClarity)
         // didSet 在 init 里不触发，这里补一次
         L10n.shared.apply(self.language)
     }

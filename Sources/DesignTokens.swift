@@ -29,10 +29,14 @@ enum DS {
     /// 内容区最大宽，窗口更宽时居中
     static let settingsContentMaxW: CGFloat = 560
 
-    // MARK: 玻璃着色
-    /// 玻璃自带 tint 的浓度。日历色与专注绿取这个，警示橙略浓一档
-    static let glassTint: Double = 0.12
-    static let glassTintWarn: Double = 0.20
+    // MARK: 玻璃暗层
+    /// 卡片透明度对应的暗层浓度：最实 0.60，最透 0.15
+    static let cardDimMax: Double = 0.60
+    static let cardDimMin: Double = 0.15
+    static let cardClarityDefault: Double = 0.4
+    static func cardDim(clarity: Double) -> Double {
+        cardDimMax - (cardDimMax - cardDimMin) * min(max(clarity, 0), 1)
+    }
 
     // MARK: 浮窗 QuickPill
     static let pillH: CGFloat = 34
@@ -167,26 +171,44 @@ enum DS {
     }
 }
 
-/// 卡片材质：系统的 Liquid Glass。只面向 macOS 26 及以上。
+/// 卡片材质：系统的 Liquid Glass，clear 变体，背景是透明的。
+///
+/// clear 玻璃本身很透，文字直接压在上面读不清，Apple 的做法是在玻璃上再垫一层暗色。
+/// 这一层的浓度就是设置里的“卡片透明度”：滑到最透时只剩一点点灰，
+/// 滑到最实时是比较深的灰黑。卡片上只有进度填充、图案和按钮带颜色。
+/// 卡片内容一律按深色外观画（白字），因为底下总是这层暗色。
 /// 注意 glassEffect 只在背景画材质，不裁剪内容，
 /// 所以调用方要自己先 clipShape，见 EventCard。
-///
-/// 按 Liquid Glass 的规范用法：
-/// 玻璃层只用于浮在内容之上的对象（这里是卡片和控件），不拿来做内容本身的背景；
-/// 语义色用玻璃自带的 tint，不去盖一层不透明的色块；
-/// interactive 让玻璃对指针和按压有镜面反应。
-struct GlassCard: ViewModifier {
-    var radius: CGFloat = DS.radius
-    var tint: SwiftUI.Color? = nil
+struct GlassSurface<S: Shape>: ViewModifier {
+    let shape: S
+    @Environment(\.cardClarity) private var clarity
 
     func body(content: Content) -> some View {
-        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
-        content.glassEffect(Glass.regular.tint(tint).interactive(), in: shape)
+        content
+            .environment(\.colorScheme, .dark)
+            .background(shape.fill(SwiftUI.Color.black.opacity(DS.cardDim(clarity: clarity))))
+            .glassEffect(Glass.clear.interactive(), in: shape)
+    }
+}
+
+/// 卡片透明度，0 到 1，越大越透。由卡叠在根上放进环境，里面所有玻璃共用
+private struct CardClarityKey: EnvironmentKey {
+    static let defaultValue: Double = 0.5
+}
+
+extension EnvironmentValues {
+    var cardClarity: Double {
+        get { self[CardClarityKey.self] }
+        set { self[CardClarityKey.self] = newValue }
     }
 }
 
 extension View {
-    func glassCard(radius: CGFloat = DS.radius, tint: SwiftUI.Color? = nil) -> some View {
-        modifier(GlassCard(radius: radius, tint: tint))
+    func glassCard(radius: CGFloat = DS.radius) -> some View {
+        modifier(GlassSurface(shape: RoundedRectangle(cornerRadius: radius, style: .continuous)))
+    }
+
+    func glassCapsule() -> some View {
+        modifier(GlassSurface(shape: Capsule()))
     }
 }

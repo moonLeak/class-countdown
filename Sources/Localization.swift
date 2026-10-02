@@ -323,6 +323,20 @@ private let l10nTable: [String: [String: String]] = [
             "zh-Hans": "准备好开始下一轮了吗？", "zh-Hant": "準備好開始下一輪了嗎？",
             "en": "Ready for the next session?"],
 
+        "sec.appearance": [
+            "zh-Hans": "外观", "zh-Hant": "外觀", "en": "Appearance"],
+
+        "appearance.clarity": [
+            "zh-Hans": "卡片透明度", "zh-Hant": "卡片透明度", "en": "Card transparency"],
+
+        "appearance.solid": ["zh-Hans": "实", "zh-Hant": "實", "en": "Solid"],
+        "appearance.clear": ["zh-Hans": "透", "zh-Hant": "透", "en": "Clear"],
+
+        "appearance.clarity.hint": [
+            "zh-Hans": "卡片背景是透明的玻璃加一层灰黑。越往“透”滑，灰黑越浅，桌面透得越多。",
+            "zh-Hant": "卡片背景是透明的玻璃加一層灰黑。越往「透」滑，灰黑越淺，桌面透得越多。",
+            "en": "Cards are clear glass with a layer of dark gray. Slide toward Clear for a lighter layer and more of your desktop showing through."],
+
         "sec.menubar": [
             "zh-Hans": "菜单栏", "zh-Hant": "選單列", "en": "Menu Bar", "ja": "メニューバー",
             "ko": "메뉴 막대", "de": "Menüleiste", "fr": "Barre des menus",

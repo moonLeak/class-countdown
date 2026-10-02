@@ -37,6 +37,21 @@ private struct GeneralTab: View {
                 LaunchAtLoginToggle()
             }
 
+            Section(L("sec.appearance")) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(L("appearance.clarity"))
+                    HStack(spacing: 10) {
+                        Text(L("appearance.solid"))
+                            .font(.system(size: DS.fCaption)).foregroundStyle(.secondary)
+                        Slider(value: $settings.cardClarity, in: 0...1)
+                        Text(L("appearance.clear"))
+                            .font(.system(size: DS.fCaption)).foregroundStyle(.secondary)
+                    }
+                    Text(L("appearance.clarity.hint"))
+                        .font(.system(size: DS.fCaption)).foregroundStyle(.secondary)
+                }
+            }
+
             Section(L("sec.menubar")) {
                 Picker(L("menubar.style"), selection: $settings.menuBarStyle) {
                     ForEach(MenuBarStyle.allCases) { Text($0.label).tag($0) }

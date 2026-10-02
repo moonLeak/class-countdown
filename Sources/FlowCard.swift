@@ -24,7 +24,7 @@ struct FlowCard: View {
             .frame(width: DS.cardW, height: DS.cardH)
             .overlay { content }
             .clipShape(DS.cardShape)
-            .glassCard(tint: engine.state == .idle ? nil : DS.Color.focus.opacity(DS.glassTint))
+            .glassCard()
             // 收起态的名称与倒计时，和 EventCard 的露出条同一套规格
             .overlay(alignment: .bottom) {
                 strip
