@@ -39,7 +39,7 @@ struct QuickPill: View {
         }
         .frame(width: open ? barWidth : DS.pillH, height: DS.pillH, alignment: .trailing)
         .clipShape(Capsule())
-        .glassEffect(.regular, in: Capsule())
+        .glassEffect(.regular.interactive(), in: Capsule())
         .shadow(color: .black.opacity(0.25), radius: 7, y: 4)
         .contentShape(Capsule())
         .onHover { h in withAnimation(widthAnimation) { hovering = h } }

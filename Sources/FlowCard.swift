@@ -24,7 +24,7 @@ struct FlowCard: View {
             .frame(width: DS.cardW, height: DS.cardH)
             .overlay { content }
             .clipShape(DS.cardShape)
-            .glassCard()
+            .glassCard(tint: engine.state == .idle ? nil : DS.Color.focus.opacity(DS.glassTint))
             // 收起态的名称与倒计时，和 EventCard 的露出条同一套规格
             .overlay(alignment: .bottom) {
                 strip
@@ -121,7 +121,8 @@ struct FlowCard: View {
 
     @ViewBuilder
     private var buttons: some View {
-        HStack(spacing: DS.buttonGap) {
+        GlassEffectContainer(spacing: DS.buttonGap) {
+          HStack(spacing: DS.buttonGap) {
             switch engine.state {
             case .idle:
                 GlassButton(title: L("flow.button.start"), symbol: "play.fill") { focus.primaryAction() }
@@ -139,6 +140,7 @@ struct FlowCard: View {
             case .breaking, .longBreaking:
                 GlassButton(title: L("flow.button.skip"), variant: .ghost) { focus.skipBreak() }
             }
+          }
         }
     }
 }

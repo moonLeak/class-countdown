@@ -26,7 +26,8 @@ struct EventCard: View {
             .overlay { content }
             // 先裁剪再上玻璃：glassEffect 只画背景，不管内容越界
             .clipShape(DS.cardShape)
-            .glassCard()
+            .glassCard(tint: (warning ? DS.warn : event.calendarColor)
+                .opacity(warning ? DS.glassTintWarn : DS.glassTint))
             // 收起态的名称与倒计时：放在 padding 之外的底部条里，条高 = 露出高度，垂直居中
             .overlay(alignment: .bottom) {
                 titleRow(showsCountdown: true)

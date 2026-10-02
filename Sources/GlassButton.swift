@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// 卡片里的胶囊按钮。primary 是绿色，ghost 是淡灰。
+/// 卡片里的胶囊按钮，用系统的玻璃：primary 带专注绿的 tint，ghost 是无色玻璃。
+/// 同一行里的两个按钮要放进 GlassEffectContainer，靠得近时玻璃会自然融合。
 struct GlassButton: View {
     enum Variant { case primary, ghost }
 
@@ -22,14 +23,14 @@ struct GlassButton: View {
             }
             .foregroundStyle(variant == .primary ? SwiftUI.Color.white : DS.l1)
             .frame(width: width, height: DS.buttonH)
-            .background(
-                Capsule().fill(variant == .primary
-                               ? DS.Color.focus.opacity(DS.primaryAlpha)
-                               : SwiftUI.Color.primary.opacity(DS.ghostAlpha))
-            )
+            .glassEffect(
+                variant == .primary
+                    ? Glass.regular.tint(DS.Color.focus).interactive()
+                    : Glass.regular.interactive(),
+                in: Capsule())
             .contentShape(Capsule())
         }
-        .buttonStyle(PressableStyle())
+        .buttonStyle(.plain)
     }
 }
 

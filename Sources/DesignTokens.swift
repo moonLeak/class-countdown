@@ -29,6 +29,11 @@ enum DS {
     /// 内容区最大宽，窗口更宽时居中
     static let settingsContentMaxW: CGFloat = 560
 
+    // MARK: 玻璃着色
+    /// 玻璃自带 tint 的浓度。日历色与专注绿取这个，警示橙略浓一档
+    static let glassTint: Double = 0.12
+    static let glassTintWarn: Double = 0.20
+
     // MARK: 浮窗 QuickPill
     static let pillH: CGFloat = 34
     static let pillGap: CGFloat = 12
@@ -165,17 +170,23 @@ enum DS {
 /// 卡片材质：系统的 Liquid Glass。只面向 macOS 26 及以上。
 /// 注意 glassEffect 只在背景画材质，不裁剪内容，
 /// 所以调用方要自己先 clipShape，见 EventCard。
+///
+/// 按 Liquid Glass 的规范用法：
+/// 玻璃层只用于浮在内容之上的对象（这里是卡片和控件），不拿来做内容本身的背景；
+/// 语义色用玻璃自带的 tint，不去盖一层不透明的色块；
+/// interactive 让玻璃对指针和按压有镜面反应。
 struct GlassCard: ViewModifier {
     var radius: CGFloat = DS.radius
+    var tint: SwiftUI.Color? = nil
 
     func body(content: Content) -> some View {
-        content
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
+        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
+        content.glassEffect(Glass.regular.tint(tint).interactive(), in: shape)
     }
 }
 
 extension View {
-    func glassCard(radius: CGFloat = DS.radius) -> some View {
-        modifier(GlassCard(radius: radius))
+    func glassCard(radius: CGFloat = DS.radius, tint: SwiftUI.Color? = nil) -> some View {
+        modifier(GlassCard(radius: radius, tint: tint))
     }
 }
