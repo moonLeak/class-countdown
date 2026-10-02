@@ -108,8 +108,6 @@ struct CardStack: View {
             // 出场退场：锚点取顶边中点，那正是菜单栏图标所在的位置，
             // 于是卡片看上去是从那个小图标里放大出来的，收回时原路缩回去。
             .environment(\.cardClarity, settings.cardClarity)
-            // 玻璃下面总有一层暗色，整个面板按深色外观画，白字才读得清
-            .environment(\.colorScheme, .dark)
             .scaleEffect(presentation.shown ? 1 : DS.appearScale, anchor: .top)
             .opacity(presentation.shown ? 1 : 0)
             .contextMenu { menuItems }

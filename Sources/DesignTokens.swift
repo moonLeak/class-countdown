@@ -29,14 +29,18 @@ enum DS {
     /// 内容区最大宽，窗口更宽时居中
     static let settingsContentMaxW: CGFloat = 560
 
-    // MARK: 玻璃暗层
-    /// 卡片透明度对应的暗层浓度：最实 0.60，最透 0.15
-    static let cardDimMax: Double = 0.60
-    static let cardDimMin: Double = 0.15
+    // MARK: 玻璃质感
+    /// 磨砂的五档，用 Apple 的系统材质，从薄到厚，模糊依次加重
+    static let frostLevels: [Material] = [
+        .ultraThinMaterial, .thinMaterial, .regularMaterial, .thickMaterial, .ultraThickMaterial
+    ]
+    /// 质感滑块的默认位置，0 是最磨砂，1 是最通透
     static let cardClarityDefault: Double = 0.4
-    static func cardDim(clarity: Double) -> Double {
-        cardDimMax - (cardDimMax - cardDimMin) * min(max(clarity, 0), 1)
-    }
+    /// clear 玻璃上垫的一层固定遮罩。Apple 对 clear 玻璃的建议做法：
+    /// 深色外观垫黑，白字在亮背景上也读得出来；浅色外观垫白，黑字在暗背景上也读得出来。
+    /// 浓度固定，不随质感滑块变，所以滑块只改模糊，不改明暗
+    static let clearVeilDark: Double = 0.35
+    static let clearVeilLight: Double = 0.30
 
     // MARK: 浮窗 QuickPill
     static let pillH: CGFloat = 34
@@ -171,23 +175,39 @@ enum DS {
     }
 }
 
-/// 卡片材质：系统的 Liquid Glass，clear 变体，背景是透明的。
+/// 卡片材质：系统的 Liquid Glass。
 ///
-/// clear 玻璃本身很透，文字直接压在上面读不清，Apple 的做法是在玻璃上再垫一层暗色。
-/// 这一层的浓度就是设置里的“卡片透明度”：滑到最透时只剩一点点灰，
-/// 滑到最实时是比较深的灰黑。卡片上只有进度填充、图案和按钮带颜色。
-/// 卡片内容一律按深色外观画（白字），因为底下总是这层暗色。
+/// 最底下是 clear 玻璃，负责边缘折射和高光，本身几乎不模糊，是“光滑”的那一端。
+/// 设置里的“玻璃质感”滑块往磨砂那边推，就在玻璃上叠系统材质，
+/// 从超薄到超厚五档，相邻两档交叉淡入，模糊程度连续变化，亮度不跟着变。
+/// 明暗交给外观模式（跟随系统、浅色、深色），材质会自己适配。
 /// 注意 glassEffect 只在背景画材质，不裁剪内容，
 /// 所以调用方要自己先 clipShape，见 EventCard。
 struct GlassSurface<S: Shape>: ViewModifier {
     let shape: S
     @Environment(\.cardClarity) private var clarity
+    @Environment(\.colorScheme) private var scheme
 
     func body(content: Content) -> some View {
         content
-            .environment(\.colorScheme, .dark)
-            .background(shape.fill(SwiftUI.Color.black.opacity(DS.cardDim(clarity: clarity))))
+            .background { frost }
             .glassEffect(Glass.clear.interactive(), in: shape)
+    }
+
+    private var frost: some View {
+        // 磨砂程度 0 到 1，再映射到五档材质之间的位置 0 到 5
+        let f = 1 - min(max(clarity, 0), 1)
+        let p = f * Double(DS.frostLevels.count)
+        return ZStack {
+            shape.fill(scheme == .dark
+                       ? SwiftUI.Color.black.opacity(DS.clearVeilDark)
+                       : SwiftUI.Color.white.opacity(DS.clearVeilLight))
+            ForEach(DS.frostLevels.indices, id: \.self) { k in
+                // 第 k 档在 p = k + 1 时满，向两边线性淡出
+                shape.fill(DS.frostLevels[k])
+                    .opacity(max(0, 1 - abs(p - Double(k + 1))))
+            }
+        }
     }
 }
 

@@ -38,6 +38,10 @@ private struct GeneralTab: View {
             }
 
             Section(L("sec.appearance")) {
+                Picker(L("appearance.mode"), selection: $settings.appearance) {
+                    ForEach(AppAppearance.allCases) { Text($0.label).tag($0) }
+                }
+                .pickerStyle(.segmented)
                 VStack(alignment: .leading, spacing: 6) {
                     Text(L("appearance.clarity"))
                     HStack(spacing: 10) {

@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import AppKit
 
 /// 界面语言。只管软件自身的文字，日程名称永远按日历里的原文显示。
 enum AppLanguage: String, CaseIterable, Identifiable {
@@ -71,6 +72,21 @@ enum SeparatorPreset: String, CaseIterable, Identifiable {
     }
 }
 
+/// 外观模式。跟随系统时不设应用外观，交回系统决定
+enum AppAppearance: String, CaseIterable, Identifiable {
+    case system, light, dark
+    var id: String { rawValue }
+    @MainActor var label: String { L("appearance.mode.\(rawValue)") }
+
+    var nsAppearance: NSAppearance? {
+        switch self {
+        case .system: return nil
+        case .light:  return NSAppearance(named: .aqua)
+        case .dark:   return NSAppearance(named: .darkAqua)
+        }
+    }
+}
+
 /// 菜单栏图标样式：圆环或徽标
 enum MenuBarStyle: String, CaseIterable, Identifiable {
     case ring, badge
@@ -120,6 +136,7 @@ final class SettingsStore: ObservableObject {
         static let focusCalendarID   = "focus.calendarID"
         static let notifyOnEnd       = "focus.notifyOnEnd"
         static let cardClarity       = "cards.clarity"
+        static let appearance        = "app.appearance"
     }
 
     /// 存“排除”而不是“勾选”，这样新加的日历默认参与倒计时
@@ -218,6 +235,14 @@ final class SettingsStore: ObservableObject {
         didSet { defaults.set(cardClarity, forKey: Key.cardClarity) }
     }
 
+    /// 跟随系统、浅色、深色。设在 NSApp 上，卡片、设置、统计窗口一起变
+    @Published var appearance: AppAppearance {
+        didSet {
+            defaults.set(appearance.rawValue, forKey: Key.appearance)
+            NSApplication.shared.appearance = appearance.nsAppearance
+        }
+    }
+
     var focusConfig: FocusConfig {
         FocusConfig(focusDuration: TimeInterval(focusMinutes) * 60,
                     shortBreakDuration: TimeInterval(shortBreakMinutes) * 60,
@@ -259,7 +284,8 @@ final class SettingsStore: ObservableObject {
             Key.writeToCalendar: false,
             Key.focusCalendarID: "",
             Key.notifyOnEnd: true,
-            Key.cardClarity: DS.cardClarityDefault
+            Key.cardClarity: DS.cardClarityDefault,
+            Key.appearance: AppAppearance.system.rawValue
         ])
         self.excludedCalendarIDs = Set(defaults.stringArray(forKey: Key.excludedCalendars) ?? [])
         self.includeAllDay      = defaults.bool(forKey: Key.includeAllDay)
@@ -286,6 +312,9 @@ final class SettingsStore: ObservableObject {
         self.focusCalendarID    = defaults.string(forKey: Key.focusCalendarID) ?? ""
         self.notifyOnEnd        = defaults.bool(forKey: Key.notifyOnEnd)
         self.cardClarity        = defaults.double(forKey: Key.cardClarity)
+        self.appearance         = AppAppearance(rawValue: defaults.string(forKey: Key.appearance) ?? "")
+                                  ?? .system
+        NSApplication.shared.appearance = self.appearance.nsAppearance
         // didSet 在 init 里不触发，这里补一次
         L10n.shared.apply(self.language)
     }

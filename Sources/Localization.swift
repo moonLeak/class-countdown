@@ -326,16 +326,25 @@ private let l10nTable: [String: [String: String]] = [
         "sec.appearance": [
             "zh-Hans": "外观", "zh-Hant": "外觀", "en": "Appearance"],
 
-        "appearance.clarity": [
-            "zh-Hans": "卡片透明度", "zh-Hant": "卡片透明度", "en": "Card transparency"],
+        "appearance.mode": [
+            "zh-Hans": "外观", "zh-Hant": "外觀", "en": "Appearance"],
+        "appearance.mode.system": [
+            "zh-Hans": "跟随系统", "zh-Hant": "跟隨系統", "en": "Auto"],
+        "appearance.mode.light": [
+            "zh-Hans": "浅色", "zh-Hant": "淺色", "en": "Light"],
+        "appearance.mode.dark": [
+            "zh-Hans": "深色", "zh-Hant": "深色", "en": "Dark"],
 
-        "appearance.solid": ["zh-Hans": "实", "zh-Hant": "實", "en": "Solid"],
-        "appearance.clear": ["zh-Hans": "透", "zh-Hant": "透", "en": "Clear"],
+        "appearance.clarity": [
+            "zh-Hans": "玻璃质感", "zh-Hant": "玻璃質感", "en": "Glass"],
+
+        "appearance.solid": ["zh-Hans": "磨砂", "zh-Hant": "磨砂", "en": "Frosted"],
+        "appearance.clear": ["zh-Hans": "通透", "zh-Hant": "通透", "en": "Clear"],
 
         "appearance.clarity.hint": [
-            "zh-Hans": "卡片背景是透明的玻璃加一层灰黑。越往“透”滑，灰黑越浅，桌面透得越多。",
-            "zh-Hant": "卡片背景是透明的玻璃加一層灰黑。越往「透」滑，灰黑越淺，桌面透得越多。",
-            "en": "Cards are clear glass with a layer of dark gray. Slide toward Clear for a lighter layer and more of your desktop showing through."],
+            "zh-Hans": "往“通透”滑，玻璃越光滑，桌面透得越清楚；往“磨砂”滑，模糊越重，文字越好读。",
+            "zh-Hant": "往「通透」滑，玻璃越光滑，桌面透得越清楚；往「磨砂」滑，模糊越重，文字越好讀。",
+            "en": "Toward Clear the glass gets smoother and your desktop shows through more sharply. Toward Frosted it blurs more and text is easier to read."],
 
         "sec.menubar": [
             "zh-Hans": "菜单栏", "zh-Hant": "選單列", "en": "Menu Bar", "ja": "メニューバー",

@@ -117,7 +117,7 @@ Resume, Skip). You can't pause a break.
 Right-click the menu bar item or a card and choose **Settings…** (or press
 Command-comma). It is a regular window with four tabs:
 
-- **General**: language (11, applied immediately), open at login; a *Card transparency* slider under Appearance (cards are clear glass with a layer of dark gray, which gets lighter toward Clear); menu bar style
+- **General**: language (11, applied immediately), open at login; Appearance: Auto, Light or Dark, plus a *Glass* slider from clear, smooth glass to frosted; menu bar style
   (ring or badge), what to show, the separator, and whether to show the next event when idle
 - **Calendars**: which calendars count; all-day events (off by default); the
   ending-soon alert (5 minutes by default)
