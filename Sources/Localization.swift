@@ -167,6 +167,28 @@ private let l10nTable: [String: [String: String]] = [
         "sec.other": [
             "zh-Hans": "其他", "zh-Hant": "其他", "en": "Other"],
 
+        "menubar.style": [
+            "zh-Hans": "外观样式", "zh-Hant": "外觀樣式", "en": "Style"],
+
+        "menubar.style.ring": [
+            "zh-Hans": "圆环", "zh-Hant": "圓環", "en": "Ring"],
+
+        "menubar.style.badge": [
+            "zh-Hans": "徽标", "zh-Hant": "徽標", "en": "Badge"],
+
+        "menubar.badgeProgress": [
+            "zh-Hans": "徽标随进度填充", "zh-Hant": "徽標隨進度填充",
+            "en": "Fill badge with progress"],
+
+        "menubar.showNext": [
+            "zh-Hans": "空闲时显示下一个日程", "zh-Hant": "閒置時顯示下一個行程",
+            "en": "Show next event when idle"],
+
+        "menubar.showNext.hint": [
+            "zh-Hans": "没有进行中的日程时，菜单栏显示下一个日程的倒计时",
+            "zh-Hant": "沒有進行中的行程時，選單列顯示下一個行程的倒數",
+            "en": "When nothing is running, the menu bar counts down to the next event"],
+
         "sec.menubar": [
             "zh-Hans": "菜单栏", "zh-Hant": "選單列", "en": "Menu Bar", "ja": "メニューバー",
             "ko": "메뉴 막대", "de": "Menüleiste", "fr": "Barre des menus",

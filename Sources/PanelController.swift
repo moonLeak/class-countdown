@@ -105,19 +105,43 @@ final class PanelController: NSObject {
                                    accessibilityDescription: L("a11y.noEvents"))
         case .running(let list):
             guard let e = list.first else { return }
-            button.image = RingIcon.image(progress: model.progress(e, now: now))
-            button.title = TimeFormat.menuBar(
-                title: e.title,
-                time: TimeFormat.countdown(model.remaining(e, now: now)),
-                showTitle: state.settings.showsTitleInMenuBar,
-                separator: state.settings.separator)
+            let time = TimeFormat.countdown(model.remaining(e, now: now))
+            let color = model.isWarning(e, now: now) ? DS.warn : e.calendarColor
+            setMenuBar(title: e.title, time: time,
+                       ringProgress: model.progress(e, now: now),
+                       badgeColor: NSColor(color))
         case .upcoming(let e):
-            button.image = RingIcon.image(progress: 0)
+            guard state.settings.showNextWhenIdle else {
+                button.title = ""
+                button.image = NSImage(systemSymbolName: "calendar",
+                                       accessibilityDescription: L("a11y.noEvents"))
+                return
+            }
+            let time = "↑" + TimeFormat.countdown(model.remaining(e, now: now, counting: true))
+            setMenuBar(title: e.title, time: time,
+                       ringProgress: 0, badgeColor: .systemGray, idle: true)
+        }
+    }
+
+    /// 两种样式共用一套文字规则。
+    /// 圆环样式：圆环在左，名称与时间写在按钮标题里。
+    /// 徽标样式：时间在徽标里，名称作为普通文字放在徽标右边。
+    private func setMenuBar(title: String, time: String, ringProgress: Double,
+                            badgeColor: NSColor, idle: Bool = false) {
+        guard let button = statusItem?.button else { return }
+        let settings = state.settings
+        switch settings.menuBarStyle {
+        case .ring:
+            button.image = RingIcon.image(progress: ringProgress)
             button.title = TimeFormat.menuBar(
-                title: e.title,
-                time: "↑" + TimeFormat.countdown(model.remaining(e, now: now, counting: true)),
-                showTitle: state.settings.showsTitleInMenuBar,
-                separator: state.settings.separator)
+                title: title, time: time,
+                showTitle: settings.showsTitleInMenuBar,
+                separator: settings.separator)
+        case .badge:
+            button.image = BadgeIcon.image(
+                text: time, color: badgeColor,
+                progress: (settings.badgeProgress && !idle) ? ringProgress : nil)
+            button.title = settings.showsTitleInMenuBar ? " " + TimeFormat.truncate(title) : ""
         }
     }
 

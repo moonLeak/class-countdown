@@ -29,6 +29,16 @@ enum DS {
     /// 内容区最大宽，窗口更宽时居中
     static let settingsContentMaxW: CGFloat = 560
 
+    // MARK: 菜单栏徽标
+    static let badgeH: CGFloat = 20
+    static let badgeRadius: CGFloat = 6
+    static let badgePadX: CGFloat = 8
+    static let badgeFont: CGFloat = 13
+    /// 底色是状态色 40%，进度填充 90%；浅色菜单栏底色提高一档
+    static let badgeBaseAlpha: Double = 0.40
+    static let badgeBaseAlphaLight: Double = 0.55
+    static let badgeFillAlpha: Double = 0.90
+
     // MARK: 字号与字重（三级，一一对应）
     static let fDisplay: CGFloat = 54
     static let wDisplay: Font.Weight = .medium      // 500

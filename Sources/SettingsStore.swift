@@ -71,6 +71,18 @@ enum SeparatorPreset: String, CaseIterable, Identifiable {
     }
 }
 
+/// 菜单栏图标样式：圆环或徽标
+enum MenuBarStyle: String, CaseIterable, Identifiable {
+    case ring, badge
+    var id: String { rawValue }
+    @MainActor var label: String {
+        switch self {
+        case .ring:  return L("menubar.style.ring")
+        case .badge: return L("menubar.style.badge")
+        }
+    }
+}
+
 /// 菜单栏显示什么
 enum MenuBarContent: String, CaseIterable, Identifiable {
     case nameAndTime, timeOnly
@@ -94,6 +106,9 @@ final class SettingsStore: ObservableObject {
         static let language          = "appLanguage"
         static let separatorPreset   = "menuBarSeparatorPreset"
         static let customSeparator   = "menuBarCustomSeparator"
+        static let menuBarStyle      = "menubar.style"
+        static let badgeProgress     = "menubar.badgeProgress"
+        static let showNextWhenIdle  = "menubar.showNextWhenIdle"
     }
 
     /// 存“排除”而不是“勾选”，这样新加的日历默认参与倒计时
@@ -132,6 +147,20 @@ final class SettingsStore: ObservableObject {
         didSet { defaults.set(customSeparator, forKey: Key.customSeparator) }
     }
 
+    @Published var menuBarStyle: MenuBarStyle {
+        didSet { defaults.set(menuBarStyle.rawValue, forKey: Key.menuBarStyle) }
+    }
+
+    /// 徽标底色是否随进度从左往右填充，关掉就是纯色
+    @Published var badgeProgress: Bool {
+        didSet { defaults.set(badgeProgress, forKey: Key.badgeProgress) }
+    }
+
+    /// 没有进行中的日程时，菜单栏是否显示下一个日程的倒计时
+    @Published var showNextWhenIdle: Bool {
+        didSet { defaults.set(showNextWhenIdle, forKey: Key.showNextWhenIdle) }
+    }
+
     /// 真正写进菜单栏的那个字符串
     var separator: String {
         if let g = separatorPreset.glyph { return g }
@@ -150,7 +179,10 @@ final class SettingsStore: ObservableObject {
             Key.menuBarContent: MenuBarContent.nameAndTime.rawValue,
             Key.language: AppLanguage.system.rawValue,
             Key.separatorPreset: SeparatorPreset.slash.rawValue,
-            Key.customSeparator: "/"
+            Key.customSeparator: "/",
+            Key.menuBarStyle: MenuBarStyle.ring.rawValue,
+            Key.badgeProgress: true,
+            Key.showNextWhenIdle: true
         ])
         self.excludedCalendarIDs = Set(defaults.stringArray(forKey: Key.excludedCalendars) ?? [])
         self.includeAllDay      = defaults.bool(forKey: Key.includeAllDay)
@@ -162,6 +194,10 @@ final class SettingsStore: ObservableObject {
         self.separatorPreset    = SeparatorPreset(rawValue: defaults.string(forKey: Key.separatorPreset) ?? "")
                                   ?? .slash
         self.customSeparator    = defaults.string(forKey: Key.customSeparator) ?? "/"
+        self.menuBarStyle       = MenuBarStyle(rawValue: defaults.string(forKey: Key.menuBarStyle) ?? "")
+                                  ?? .ring
+        self.badgeProgress      = defaults.bool(forKey: Key.badgeProgress)
+        self.showNextWhenIdle   = defaults.bool(forKey: Key.showNextWhenIdle)
         // didSet 在 init 里不触发，这里补一次
         L10n.shared.apply(self.language)
     }

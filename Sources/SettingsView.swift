@@ -38,6 +38,13 @@ private struct GeneralTab: View {
             }
 
             Section(L("sec.menubar")) {
+                Picker(L("menubar.style"), selection: $settings.menuBarStyle) {
+                    ForEach(MenuBarStyle.allCases) { Text($0.label).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                if settings.menuBarStyle == .badge {
+                    Toggle(L("menubar.badgeProgress"), isOn: $settings.badgeProgress)
+                }
                 Picker(L("row.menubarContent"), selection: $settings.menuBarContent) {
                     ForEach(MenuBarContent.allCases) { Text($0.label).tag($0) }
                 }
@@ -59,6 +66,12 @@ private struct GeneralTab: View {
                     }
                 }
                 .disabled(!settings.showsTitleInMenuBar)
+                VStack(alignment: .leading, spacing: 2) {
+                    Toggle(L("menubar.showNext"), isOn: $settings.showNextWhenIdle)
+                    Text(L("menubar.showNext.hint"))
+                        .font(.system(size: DS.fCaption))
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .formStyle(.grouped)
