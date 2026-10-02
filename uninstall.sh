@@ -1,8 +1,8 @@
 #!/bin/bash
-# 彻底卸载 ClassCountdown：退出进程、删应用、清偏好设置与登录项。
+# 彻底卸载 TimeTool：退出进程、删应用、清偏好设置与登录项。
 set -uo pipefail
 
-APP_NAME="ClassCountdown"
+APP_NAME="TimeTool"
 BUNDLE_ID="com.carson.classcountdown"
 
 echo "==> 退出正在运行的实例"

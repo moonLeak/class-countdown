@@ -82,7 +82,7 @@ final class PanelController: NSObject {
         button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         button.imagePosition = .imageLeading
         // 悬停能看到这一份是什么时候编译的，用来确认跑的是哪次产物
-        button.toolTip = "ClassCountdown  build \(Self.buildStamp)"
+        button.toolTip = "TimeTool  build \(Self.buildStamp)"
         button.font = .monospacedDigitSystemFont(ofSize: 13, weight: .regular)
         refreshTitle(now: state.tick.now, phase: state.model.phase)
     }

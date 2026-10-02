@@ -25,7 +25,7 @@
 2. 右键菜单栏图标：`sendAction(on: [.leftMouseUp, .rightMouseUp])`，在 `togglePanel` 里用 `NSApp.currentEvent?.type == .rightMouseUp` 分流，弹出 `NSMenu`（打开日历、设置、关于、退出），面板若已打开先收起。
 3. 菜单栏图标：新增 `Sources/RingIcon.swift`，绘制浅灰轨道加进度弧的 template image，从 12 点钟顺时针。进行中显示事件进度，即将开始显示空环。
 
-本机验证命令：`pkill -x ClassCountdown; sleep 1; ./build.sh && open build/ClassCountdown.app`
+本机验证命令：`pkill -x TimeTool; sleep 1; ./build.sh && open build/TimeTool.app`
 
 需要留意：template image 只有透明度通道，所以“灰色轨道”用 28% 不透明度的黑色表现，系统会在深色菜单栏里自动变白。
 

@@ -1,11 +1,11 @@
 #!/bin/bash
-# 一条命令产出可运行的 ClassCountdown.app。
+# 一条命令产出可运行的 TimeTool.app。
 # 只需要 Xcode Command Line Tools，不需要打开 Xcode。
 set -euo pipefail
 
 cd "$(dirname "$0")"
 
-APP_NAME="ClassCountdown"
+APP_NAME="TimeTool"
 BUILD_DIR="build"
 APP="$BUILD_DIR/$APP_NAME.app"
 TARGET="$(uname -m)-apple-macos26.0"

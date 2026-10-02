@@ -1,4 +1,4 @@
-# ClassCountdown
+# TimeTool
 
 **English** · [简体中文](README.zh-CN.md)
 
@@ -23,7 +23,7 @@ which does not exist on earlier versions.
 
 ### Option 1: Download the DMG (recommended)
 
-1. Grab the latest `ClassCountdown-x.y.z.dmg` from [Releases](../../releases/latest)
+1. Grab the latest `TimeTool-x.y.z.dmg` from [Releases](../../releases/latest)
 2. Open it and drag the app into your Applications folder
 3. **macOS will block it the first time.** See "Why won't it open" below.
 
@@ -43,7 +43,7 @@ macOS 26 or later, and the Xcode Command Line Tools:
 ```bash
 git clone https://github.com/moonLeak/class-countdown.git
 cd class-countdown
-./build.sh && open build/ClassCountdown.app
+./build.sh && open build/TimeTool.app
 ```
 
 ---
@@ -63,12 +63,12 @@ Two ways through, pick either:
 
 **GUI**: open the app once (it fails), then go to
 **System Settings → Privacy & Security**, scroll down to the message about
-ClassCountdown, and click **Open Anyway**.
+TimeTool, and click **Open Anyway**.
 
 **Terminal**:
 
 ```bash
-xattr -dr com.apple.quarantine /Applications/ClassCountdown.app
+xattr -dr com.apple.quarantine /Applications/TimeTool.app
 ```
 
 ---

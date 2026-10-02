@@ -3,7 +3,7 @@ import AppKit
 
 @main
 @MainActor
-struct ClassCountdownApp: App {
+struct TimeToolApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
 
     var body: some Scene {

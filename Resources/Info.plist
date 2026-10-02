@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>ClassCountdown</string>
+    <string>TimeTool</string>
     <key>CFBundleDisplayName</key>
-    <string>下课倒计时</string>
+    <string>TimeTool</string>
     <key>CFBundleIdentifier</key>
     <string>com.carson.classcountdown</string>
     <key>CFBundleExecutable</key>
-    <string>ClassCountdown</string>
+    <string>TimeTool</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>

@@ -68,7 +68,7 @@ jobs:
 
             - Open it once (it fails), then go to **System Settings → Privacy & Security**,
               scroll down and click **Open Anyway**.
-            - Or run: `xattr -dr com.apple.quarantine /Applications/ClassCountdown.app`
+            - Or run: `xattr -dr com.apple.quarantine /Applications/TimeTool.app`
 
             The countdown appears in your menu bar; it asks for calendar access on first launch.
 
@@ -84,6 +84,6 @@ jobs:
             - 打开一次（会报错），然后去 **系统设置 → 隐私与安全性**，
               往下翻找到提示，点 **仍要打开**。
             - 或者在终端里跑一行：
-              `xattr -dr com.apple.quarantine /Applications/ClassCountdown.app`
+              `xattr -dr com.apple.quarantine /Applications/TimeTool.app`
 
             装好后菜单栏会出现倒计时，首次启动会请求日历权限。

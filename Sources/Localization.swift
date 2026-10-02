@@ -61,11 +61,11 @@ private let l10nTable: [String: [String: String]] = [
             "es": "Ajustes…", "pt": "Ajustes…", "ru": "Настройки…"],
 
         "menu.about": [
-            "zh-Hans": "关于 ClassCountdown", "zh-Hant": "關於 ClassCountdown",
-            "en": "About ClassCountdown", "ja": "ClassCountdown について",
-            "ko": "ClassCountdown 정보", "de": "Über ClassCountdown",
-            "fr": "À propos de ClassCountdown", "es": "Acerca de ClassCountdown",
-            "pt": "Sobre o ClassCountdown", "ru": "О ClassCountdown"],
+            "zh-Hans": "关于 TimeTool", "zh-Hant": "關於 TimeTool",
+            "en": "About TimeTool", "ja": "TimeTool について",
+            "ko": "TimeTool 정보", "de": "Über TimeTool",
+            "fr": "À propos de TimeTool", "es": "Acerca de TimeTool",
+            "pt": "Sobre o TimeTool", "ru": "О TimeTool"],
 
         "menu.openCalendar": [
             "zh-Hans": "打开日历", "zh-Hant": "打開日曆", "en": "Open Calendar",
@@ -135,11 +135,11 @@ private let l10nTable: [String: [String: String]] = [
             "pt": "Começa em", "ru": "До начала"],
 
         "settings.title": [
-            "zh-Hans": "ClassCountdown 设置", "zh-Hant": "ClassCountdown 設定",
-            "en": "ClassCountdown Settings", "ja": "ClassCountdown 設定",
-            "ko": "ClassCountdown 설정", "de": "ClassCountdown-Einstellungen",
-            "fr": "Réglages ClassCountdown", "es": "Ajustes de ClassCountdown",
-            "pt": "Ajustes do ClassCountdown", "ru": "Настройки ClassCountdown"],
+            "zh-Hans": "TimeTool 设置", "zh-Hant": "TimeTool 設定",
+            "en": "TimeTool Settings", "ja": "TimeTool 設定",
+            "ko": "TimeTool 설정", "de": "TimeTool-Einstellungen",
+            "fr": "Réglages TimeTool", "es": "Ajustes de TimeTool",
+            "pt": "Ajustes do TimeTool", "ru": "Настройки TimeTool"],
 
         "tab.general": [
             "zh-Hans": "通用", "zh-Hant": "一般", "en": "General", "ja": "一般",
@@ -234,11 +234,11 @@ private let l10nTable: [String: [String: String]] = [
             "pt": "%d minutos restantes", "ru": "Осталось %d мин."],
 
         "row.quitApp": [
-            "zh-Hans": "退出 ClassCountdown", "zh-Hant": "結束 ClassCountdown",
-            "en": "Quit ClassCountdown", "ja": "ClassCountdown を終了",
-            "ko": "ClassCountdown 종료", "de": "ClassCountdown beenden",
-            "fr": "Quitter ClassCountdown", "es": "Salir de ClassCountdown",
-            "pt": "Sair do ClassCountdown", "ru": "Выйти из ClassCountdown"],
+            "zh-Hans": "退出 TimeTool", "zh-Hant": "結束 TimeTool",
+            "en": "Quit TimeTool", "ja": "TimeTool を終了",
+            "ko": "TimeTool 종료", "de": "TimeTool beenden",
+            "fr": "Quitter TimeTool", "es": "Salir de TimeTool",
+            "pt": "Sair do TimeTool", "ru": "Выйти из TimeTool"],
 
         "calendars.hint": [
             "zh-Hans": "只有勾选的日历参与倒计时。进度条会用日历自己的颜色。",

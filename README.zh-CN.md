@@ -1,4 +1,4 @@
-# ClassCountdown 下课倒计时
+# TimeTool
 
 [English](README.md) · **简体中文**
 
@@ -20,7 +20,7 @@ macOS 26 或更高版本。卡片材质用的是系统的 Liquid Glass，更早�
 
 ### 方式一：下载 DMG（推荐给所有人）
 
-1. 去 [Releases](../../releases/latest) 下载最新的 `ClassCountdown-x.y.z.dmg`
+1. 去 [Releases](../../releases/latest) 下载最新的 `TimeTool-x.y.z.dmg`
 2. 双击打开，把应用拖进「应用程序」文件夹
 3. **第一次打开会被系统拦住**，见下面「为什么打不开」
 
@@ -40,7 +40,7 @@ brew install --cask --no-quarantine class-countdown
 ```bash
 git clone https://github.com/moonLeak/class-countdown.git
 cd class-countdown
-./build.sh && open build/ClassCountdown.app
+./build.sh && open build/TimeTool.app
 ```
 
 ---
@@ -56,13 +56,13 @@ macOS 会拦截没有经过苹果「公证」（notarization）的应用，提�
 放行方式，任选其一：
 
 **图形界面**：双击打开一次（会报错），然后去
-**系统设置 → 隐私与安全性**，往下翻会看到「已阻止 ClassCountdown」，
+**系统设置 → 隐私与安全性**，往下翻会看到「已阻止 TimeTool」，
 点 **仍要打开**。
 
 **命令行**：
 
 ```bash
-xattr -dr com.apple.quarantine /Applications/ClassCountdown.app
+xattr -dr com.apple.quarantine /Applications/TimeTool.app
 ```
 
 ---

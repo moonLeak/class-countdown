@@ -229,7 +229,7 @@ SF Symbols，描边 1.8，常规尺寸 15，工具栏标签 20。
 
 | 层 | 名称 | 内容 |
 |---|---|---|
-| L0 | App | `ClassCountdown`（代号待定） |
+| L0 | App | `TimeTool` |
 | L1 | 界面（Surface） | `Panel`（点菜单栏出现的卡片面板）、`SettingsWindow`、`StatsWindow`、`MenuBarItem`、`ContextMenu` |
 | L2 | 容器（Container） | `CardStack`、`QuickPill`、`FormGroup`、`ToolbarTabs` |
 | L3 | 元件（Component） | `EventCard`、`FlowCard`、`GlassButton`、`ToggleRow` 等，见 3.2 |
